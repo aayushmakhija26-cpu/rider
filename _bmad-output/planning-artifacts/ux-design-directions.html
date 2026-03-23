@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jupiter — UX Design Directions</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+  * { font-family: 'Inter', sans-serif; }
+  .tab-btn { transition: all 0.2s; }
+  .tab-btn.active { background: #2563EB; color: white; }
+  .direction-panel { display: none; }
+  .direction-panel.active { display: block; }
+  .font-tabular { font-variant-numeric: tabular-nums; }
+  .trade-arc { stroke-dasharray: 251; stroke-dashoffset: 75; transition: stroke-dashoffset 1s ease; }
+  .mockup-label { background: #1E40AF; color: white; font-size: 11px; padding: 2px 8px; border-radius: 999px; display: inline-block; margin-bottom: 8px; letter-spacing: 0.05em; text-transform: uppercase; }
+</style>
+</head>
+<body class="bg-slate-100 min-h-screen">
+
+<!-- Header -->
+<div class="bg-white border-b border-slate-200 sticky top-0 z-50">
+  <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+    <div>
+      <div class="flex items-center gap-2">
+        <div class="w-7 h-7 rounded-md bg-blue-600 flex items-center justify-center">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5" fill="white" opacity="0.3"/><circle cx="7" cy="7" r="2.5" fill="white"/></svg>
+        </div>
+        <span class="font-semibold text-slate-900">Jupiter</span>
+        <span class="text-slate-400 text-sm">·</span>
+        <span class="text-slate-500 text-sm">UX Design Directions</span>
+      </div>
+    </div>
+    <div class="text-xs text-slate-400">6 directions · Consumer Dashboard + Dealer Portal</div>
+  </div>
+
+  <!-- Direction Tabs -->
+  <div class="max-w-7xl mx-auto px-6 pb-3 flex gap-2 flex-wrap">
+    <button onclick="showDirection(1)" id="tab-1" class="tab-btn active px-4 py-1.5 rounded-full text-sm font-medium border border-slate-200">A — Financial Trust</button>
+    <button onclick="showDirection(2)" id="tab-2" class="tab-btn px-4 py-1.5 rounded-full text-sm font-medium border border-slate-200 bg-white text-slate-600">B — Bold Hero</button>
+    <button onclick="showDirection(3)" id="tab-3" class="tab-btn px-4 py-1.5 rounded-full text-sm font-medium border border-slate-200 bg-white text-slate-600">C — Minimal Data</button>
+    <button onclick="showDirection(4)" id="tab-4" class="tab-btn px-4 py-1.5 rounded-full text-sm font-medium border border-slate-200 bg-white text-slate-600">D — Warm Welcome</button>
+    <button onclick="showDirection(5)" id="tab-5" class="tab-btn px-4 py-1.5 rounded-full text-sm font-medium border border-slate-200 bg-white text-slate-600">E — Command Center</button>
+    <button onclick="showDirection(6)" id="tab-6" class="tab-btn px-4 py-1.5 rounded-full text-sm font-medium border border-slate-200 bg-white text-slate-600">F — Sales Ready</button>
+  </div>
+</div>
+
+<div class="max-w-7xl mx-auto px-6 py-8">
+
+<!-- ============================================================ -->
+<!-- DIRECTION A: Financial Trust (Coin-inspired) -->
+<!-- ============================================================ -->
+<div id="dir-1" class="direction-panel active">
+  <div class="mb-6">
+    <h2 class="text-xl font-semibold text-slate-900">Direction A — Financial Trust</h2>
+    <p class="text-slate-500 text-sm mt-1">Coin by Zerodha-inspired. Clean cards, strong number hierarchy, color-coded financial states. Vehicle Value dominates. Trust through data attribution.</p>
+  </div>
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+    <!-- Consumer Dashboard -->
+    <div>
+      <div class="mockup-label">Consumer Dashboard · Mobile</div>
+      <div class="bg-white rounded-2xl shadow-lg overflow-hidden" style="max-width:390px">
+        <!-- Dealer Header -->
+        <div class="bg-blue-600 px-5 pt-5 pb-6">
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-2">
+              <div class="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
+                <span class="text-blue-600 font-bold text-xs">★</span>
+              </div>
+              <span class="text-white font-semibold text-sm">Sunrise Motors</span>
+            </div>
+            <span class="text-blue-200 text-xs">Your Vehicle Report</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <div class="w-16 h-12 bg-blue-500 rounded-lg flex items-center justify-center">
+              <svg width="32" height="20" viewBox="0 0 32 20" fill="none"><rect x="4" y="8" width="24" height="9" rx="2" fill="white" opacity="0.6"/><rect x="7" y="4" width="14" height="7" rx="2" fill="white" opacity="0.4"/><circle cx="9" cy="17" r="2.5" fill="white"/><circle cx="23" cy="17" r="2.5" fill="white"/></svg>
+            </div>
+            <div>
+              <div class="text-white font-semibold">2021 Ford Explorer</div>
+              <div class="text-blue-200 text-xs">VIN: 1FM5K8D82MGA12345</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tiles -->
+        <div class="p-4 space-y-3 bg-slate-50">
+
+          <!-- Vehicle Value -->
+          <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-100">
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-xs text-slate-500 font-medium">CURRENT MARKET VALUE</span>
+              <span class="text-xs text-slate-400">Valued by JD Power</span>
+            </div>
+            <div class="text-3xl font-bold text-slate-900 font-tabular">$28,400</div>
+            <div class="flex items-center gap-1 mt-1">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 2L10 8H2L6 2Z" fill="#059669"/></svg>
+              <span class="text-emerald-600 text-xs font-medium">+$1,200 since last month</span>
+            </div>
+          </div>
+
+          <!-- Equity + Payoff row -->
+          <div class="grid grid-cols-2 gap-3">
+            <div class="bg-white rounded-xl p-3 shadow-sm border-l-4 border-emerald-500">
+              <div class="text-xs text-slate-500 mb-1">YOUR EQUITY</div>
+              <div class="text-xl font-bold text-emerald-600 font-tabular">$4,200</div>
+              <div class="text-xs text-slate-400 mt-0.5">Positive equity</div>
+            </div>
+            <div class="bg-white rounded-xl p-3 shadow-sm border-l-4 border-slate-200">
+              <div class="text-xs text-slate-500 mb-1">LOAN PAYOFF</div>
+              <div class="text-xl font-bold text-slate-800 font-tabular">$24,200</div>
+              <div class="text-xs text-slate-400 mt-0.5">Remaining balance</div>
+            </div>
+          </div>
+
+          <!-- Trade Timer -->
+          <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-100">
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="text-xs text-slate-500 font-medium mb-1">TRADE TIMER</div>
+                <div class="text-base font-semibold text-slate-900">Optimal window in <span class="text-emerald-600">47 days</span></div>
+                <div class="text-xs text-slate-400 mt-0.5">Based on depreciation + payoff + seasonality</div>
+              </div>
+              <div class="relative w-14 h-14">
+                <svg viewBox="0 0 44 44" class="w-14 h-14 -rotate-90">
+                  <circle cx="22" cy="22" r="18" fill="none" stroke="#E2E8F0" stroke-width="4"/>
+                  <circle cx="22" cy="22" r="18" fill="none" stroke="#059669" stroke-width="4" stroke-dasharray="113" stroke-dashoffset="28" stroke-linecap="round"/>
+                </svg>
+                <div class="absolute inset-0 flex items-center justify-center">
+                  <span class="text-xs font-bold text-emerald-600">75%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recall -->
+          <div class="bg-amber-50 rounded-xl p-3 border border-amber-200 flex items-center gap-3">
+            <div class="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center flex-shrink-0">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 2L12.5 11H1.5L7 2Z" fill="#F59E0B"/><rect x="6.5" y="6" width="1" height="3" rx="0.5" fill="white"/><rect x="6.5" y="9.5" width="1" height="1" rx="0.5" fill="white"/></svg>
+            </div>
+            <div class="flex-1">
+              <div class="text-xs font-semibold text-amber-800">1 Active Recall</div>
+              <div class="text-xs text-amber-600">Fuel pump module · Book service</div>
+            </div>
+            <button class="text-xs text-amber-700 font-medium bg-amber-100 px-2 py-1 rounded-lg">Book →</button>
+          </div>
+
+          <!-- Account CTA -->
+          <div class="bg-blue-50 rounded-xl p-3 border border-blue-100 text-center">
+            <div class="text-xs text-blue-700 font-medium">Keep tracking your 2021 Explorer</div>
+            <div class="text-xs text-blue-500 mt-0.5">This link expires in 7 days · Create a free account</div>
+            <button class="mt-2 w-full bg-blue-600 text-white text-xs font-semibold py-2 rounded-lg">Create Account</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dealer Portal -->
+    <div>
+      <div class="mockup-label">Dealer Portal · Desktop</div>
+      <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+        <div class="flex h-96">
+          <!-- Sidebar -->
+          <div class="w-52 bg-slate-900 flex-shrink-0 p-4">
+            <div class="flex items-center gap-2 mb-6">
+              <div class="w-6 h-6 bg-blue-500 rounded flex items-center justify-center">
+                <span class="text-white text-xs font-bold">J</span>
+              </div>
+              <span class="text-white font-semibold text-sm">Jupiter</span>
+            </div>
+            <div class="space-y-1">
+              <div class="flex items-center gap-2 px-2 py-1.5 rounded-lg bg-blue-600 text-white text-xs font-medium">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="2" y="2" width="4" height="4" rx="1" fill="currentColor"/><rect x="8" y="2" width="4" height="4" rx="1" fill="currentColor"/><rect x="2" y="8" width="4" height="4" rx="1" fill="currentColor"/><rect x="8" y="8" width="4" height="4" rx="1" fill="currentColor"/></svg>
+                Analytics
+              </div>
+              <div class="flex items-center gap-2 px-2 py-1.5 rounded-lg text-slate-400 text-xs hover:text-white">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="2" y="3" width="10" height="8" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M5 3V2M9 3V2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                Campaigns
+              </div>
+              <div class="flex items-center gap-2 px-2 py-1.5 rounded-lg text-slate-400 text-xs hover:text-white">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="5" r="2.5" stroke="currentColor" stroke-width="1.2"/><path d="M2 12c0-2.761 2.239-5 5-5s5 2.239 5 5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                Consumers
+              </div>
+              <div class="flex items-center gap-2 px-2 py-1.5 rounded-lg text-slate-400 text-xs hover:text-white">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.2"/><path d="M7 4v3l2 2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                DMS Sync
+              </div>
+              <div class="border-t border-slate-700 my-2"></div>
+              <div class="flex items-center gap-2 px-2 py-1.5 rounded-lg text-slate-400 text-xs hover:text-white">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="2" y="2" width="10" height="10" rx="2" stroke="currentColor" stroke-width="1.2"/><path d="M5 7h4M7 5v4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                Branding
+              </div>
+              <div class="flex items-center gap-2 px-2 py-1.5 rounded-lg text-slate-400 text-xs hover:text-white">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="4" width="12" height="8" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M4 4V3a3 3 0 016 0v1" stroke="currentColor" stroke-width="1.2"/></svg>
+                Billing
+              </div>
+            </div>
+          </div>
+          <!-- Main Content -->
+          <div class="flex-1 p-5 overflow-hidden">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <h1 class="text-base font-semibold text-slate-900">Analytics</h1>
+                <p class="text-xs text-slate-400">Sunrise Motors · Last 30 days</p>
+              </div>
+              <div class="flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs px-2.5 py-1 rounded-full">
+                <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></div>
+                DMS Synced · 2h ago
+              </div>
+            </div>
+            <!-- Stat Cards -->
+            <div class="grid grid-cols-4 gap-3 mb-4">
+              <div class="bg-slate-50 rounded-lg p-3 border border-slate-100">
+                <div class="text-xs text-slate-400 mb-1">Open Rate</div>
+                <div class="text-xl font-bold text-slate-900 font-tabular">34%</div>
+                <div class="text-xs text-emerald-500">↑ vs 22% avg</div>
+              </div>
+              <div class="bg-slate-50 rounded-lg p-3 border border-slate-100">
+                <div class="text-xs text-slate-400 mb-1">Active Consumers</div>
+                <div class="text-xl font-bold text-slate-900 font-tabular">147</div>
+                <div class="text-xs text-slate-400">in last 30d</div>
+              </div>
+              <div class="bg-emerald-50 rounded-lg p-3 border border-emerald-200">
+                <div class="text-xs text-emerald-600 mb-1">In Green Zone</div>
+                <div class="text-xl font-bold text-emerald-700 font-tabular">12</div>
+                <div class="text-xs text-emerald-500">Trade-ready now</div>
+              </div>
+              <div class="bg-slate-50 rounded-lg p-3 border border-slate-100">
+                <div class="text-xs text-slate-400 mb-1">Leads</div>
+                <div class="text-xl font-bold text-slate-900 font-tabular">3</div>
+                <div class="text-xs text-blue-500">Jupiter-attributed</div>
+              </div>
+            </div>
+            <!-- Table -->
+            <div class="border border-slate-200 rounded-lg overflow-hidden">
+              <table class="w-full text-xs">
+                <thead class="bg-slate-50 border-b border-slate-200">
+                  <tr>
+                    <th class="text-left px-3 py-2 text-slate-500 font-medium">Consumer</th>
+                    <th class="text-left px-3 py-2 text-slate-500 font-medium">Vehicle</th>
+                    <th class="text-left px-3 py-2 text-slate-500 font-medium">Trade Timer</th>
+                    <th class="text-left px-3 py-2 text-slate-500 font-medium">Visits</th>
+                    <th class="text-left px-3 py-2 text-slate-500 font-medium">Last Seen</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                  <tr class="bg-emerald-50">
+                    <td class="px-3 py-2 font-medium text-slate-900">Marcus T.</td>
+                    <td class="px-3 py-2 text-slate-500">2021 Ford Explorer</td>
+                    <td class="px-3 py-2"><span class="bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded-full font-medium">● Green</span></td>
+                    <td class="px-3 py-2 font-medium">4</td>
+                    <td class="px-3 py-2 text-slate-400">Today</td>
+                  </tr>
+                  <tr>
+                    <td class="px-3 py-2 font-medium text-slate-900">Sarah K.</td>
+                    <td class="px-3 py-2 text-slate-500">2020 Honda CR-V</td>
+                    <td class="px-3 py-2"><span class="bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded-full font-medium">● Green</span></td>
+                    <td class="px-3 py-2 font-medium">3</td>
+                    <td class="px-3 py-2 text-slate-400">Yesterday</td>
+                  </tr>
+                  <tr>
+                    <td class="px-3 py-2 font-medium text-slate-900">David R.</td>
+                    <td class="px-3 py-2 text-slate-500">2019 Toyota RAV4</td>
+                    <td class="px-3 py-2"><span class="bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full font-medium">● Amber</span></td>
+                    <td class="px-3 py-2 font-medium">2</td>
+                    <td class="px-3 py-2 text-slate-400">2 days ago</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- DIRECTION B: Bold Hero -->
+<!-- ============================================================ -->
+<div id="dir-2" class="direction-panel">
+  <div class="mb-6">
+    <h2 class="text-xl font-semibold text-slate-900">Direction B — Bold Hero</h2>
+    <p class="text-slate-500 text-sm mt-1">Full-width vehicle hero image with value overlay. Dramatic first impression. Value and equity displayed as an overlay on the vehicle photo. More premium feel.</p>
+  </div>
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <div>
+      <div class="mockup-label">Consumer Dashboard · Mobile</div>
+      <div class="bg-white rounded-2xl shadow-lg overflow-hidden" style="max-width:390px">
+        <!-- Hero -->
+        <div class="relative bg-gradient-to-br from-slate-800 to-slate-900 h-52">
+          <div class="absolute inset-0 flex items-center justify-center opacity-20">
+            <svg width="200" height="120" viewBox="0 0 200 120" fill="none"><rect x="20" y="50" width="160" height="55" rx="10" fill="white"/><rect x="45" y="25" width="90" height="40" rx="8" fill="white" opacity="0.7"/><circle cx="55" cy="105" r="14" fill="white"/><circle cx="145" cy="105" r="14" fill="white"/><rect x="25" y="70" width="20" height="15" rx="2" fill="rgba(0,0,0,0.3)"/><rect x="155" y="70" width="20" height="15" rx="2" fill="rgba(0,0,0,0.3)"/></svg>
+          </div>
+          <!-- Dealer badge -->
+          <div class="absolute top-4 left-4 flex items-center gap-2">
+            <div class="w-7 h-7 bg-white rounded-lg flex items-center justify-center shadow">
+              <span class="text-blue-600 font-bold text-xs">★</span>
+            </div>
+            <span class="text-white font-semibold text-sm drop-shadow">Sunrise Motors</span>
+          </div>
+          <!-- Value overlay -->
+          <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-5">
+            <div class="text-white/70 text-xs font-medium mb-0.5">2021 Ford Explorer · Your Market Value</div>
+            <div class="text-white text-4xl font-bold font-tabular">$28,400</div>
+            <div class="flex items-center gap-2 mt-1">
+              <span class="bg-emerald-500 text-white text-xs px-2 py-0.5 rounded-full font-medium">↑ $1,200 this month</span>
+              <span class="text-white/60 text-xs">JD Power</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cards below hero -->
+        <div class="p-4 space-y-3 bg-slate-50">
+          <div class="grid grid-cols-2 gap-3">
+            <div class="bg-white rounded-xl p-3 shadow-sm">
+              <div class="text-xs text-slate-500 mb-1">YOUR EQUITY</div>
+              <div class="text-2xl font-bold text-emerald-600 font-tabular">$4,200</div>
+              <div class="w-full bg-slate-100 rounded-full h-1.5 mt-2">
+                <div class="bg-emerald-500 h-1.5 rounded-full" style="width:62%"></div>
+              </div>
+            </div>
+            <div class="bg-white rounded-xl p-3 shadow-sm">
+              <div class="text-xs text-slate-500 mb-1">LOAN PAYOFF</div>
+              <div class="text-2xl font-bold text-slate-800 font-tabular">$24,200</div>
+              <div class="text-xs text-slate-400 mt-2">Est. 28 months left</div>
+            </div>
+          </div>
+          <!-- Trade Timer -->
+          <div class="bg-white rounded-xl p-4 shadow-sm">
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="text-xs text-slate-500 mb-0.5">TRADE TIMER</div>
+                <div class="font-semibold text-slate-900">Optimal in <span class="text-emerald-600">47 days</span></div>
+                <div class="text-xs text-slate-400 mt-0.5">Entering green zone</div>
+              </div>
+              <div class="w-12 h-12 bg-emerald-50 rounded-full border-4 border-emerald-400 flex items-center justify-center">
+                <span class="text-emerald-600 font-bold text-xs">47d</span>
+              </div>
+            </div>
+          </div>
+          <!-- Recall alert -->
+          <div class="bg-white rounded-xl p-3 shadow-sm flex items-center gap-3 border-l-4 border-amber-400">
+            <div>
+              <div class="text-xs font-semibold text-slate-800">⚠ Active Recall</div>
+              <div class="text-xs text-slate-400">Fuel pump · Schedule service</div>
+            </div>
+            <button class="ml-auto bg-slate-900 text-white text-xs px-3 py-1.5 rounded-lg font-medium">Book</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dealer Portal - Bold -->
+    <div>
+      <div class="mockup-label">Dealer Portal · Desktop</div>
+      <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+        <div class="flex h-96">
+          <div class="w-52 bg-blue-700 flex-shrink-0 p-4">
+            <div class="flex items-center gap-2 mb-6">
+              <div class="w-7 h-7 bg-white rounded-lg flex items-center justify-center">
+                <span class="text-blue-600 font-bold text-sm">J</span>
+              </div>
+              <span class="text-white font-bold text-sm">Jupiter</span>
+            </div>
+            <div class="space-y-1">
+              <div class="px-2 py-1.5 rounded-lg bg-white/20 text-white text-xs font-semibold">Analytics</div>
+              <div class="px-2 py-1.5 rounded-lg text-blue-200 text-xs">Campaigns</div>
+              <div class="px-2 py-1.5 rounded-lg text-blue-200 text-xs">Consumers</div>
+              <div class="px-2 py-1.5 rounded-lg text-blue-200 text-xs">DMS Sync</div>
+              <div class="border-t border-blue-600 my-2"></div>
+              <div class="px-2 py-1.5 rounded-lg text-blue-200 text-xs">Branding</div>
+              <div class="px-2 py-1.5 rounded-lg text-blue-200 text-xs">Billing</div>
+            </div>
+          </div>
+          <div class="flex-1 p-5 overflow-hidden bg-slate-50">
+            <div class="bg-blue-600 rounded-xl p-4 mb-4 text-white">
+              <div class="text-xs text-blue-200 mb-1">Last Campaign Performance</div>
+              <div class="flex items-end gap-4">
+                <div><div class="text-3xl font-bold">34%</div><div class="text-xs text-blue-200">Open rate</div></div>
+                <div><div class="text-xl font-bold">6</div><div class="text-xs text-blue-200">Multi-visit consumers</div></div>
+                <div><div class="text-xl font-bold">3</div><div class="text-xs text-blue-200">Leads</div></div>
+              </div>
+            </div>
+            <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+              <div class="px-4 py-2 border-b border-slate-100 flex items-center justify-between">
+                <span class="text-xs font-semibold text-slate-700">Hot Leads · Green Zone</span>
+                <span class="bg-emerald-100 text-emerald-700 text-xs px-2 py-0.5 rounded-full font-medium">12 consumers</span>
+              </div>
+              <table class="w-full text-xs">
+                <tbody class="divide-y divide-slate-50">
+                  <tr class="hover:bg-slate-50">
+                    <td class="px-4 py-2.5 font-medium text-slate-900">Marcus T.</td>
+                    <td class="px-4 py-2.5 text-slate-500">2021 Explorer</td>
+                    <td class="px-4 py-2.5"><span class="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full">Green · 47d</span></td>
+                    <td class="px-4 py-2.5"><span class="font-semibold">4 visits</span></td>
+                  </tr>
+                  <tr class="hover:bg-slate-50">
+                    <td class="px-4 py-2.5 font-medium text-slate-900">Sarah K.</td>
+                    <td class="px-4 py-2.5 text-slate-500">2020 CR-V</td>
+                    <td class="px-4 py-2.5"><span class="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full">Green · 12d</span></td>
+                    <td class="px-4 py-2.5"><span class="font-semibold">3 visits</span></td>
+                  </tr>
+                  <tr class="hover:bg-slate-50">
+                    <td class="px-4 py-2.5 font-medium text-slate-900">David R.</td>
+                    <td class="px-4 py-2.5 text-slate-500">2019 RAV4</td>
+                    <td class="px-4 py-2.5"><span class="bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">Amber · 68d</span></td>
+                    <td class="px-4 py-2.5"><span class="font-semibold">2 visits</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- DIRECTION C: Minimal Data -->
+<!-- ============================================================ -->
+<div id="dir-3" class="direction-panel">
+  <div class="mb-6">
+    <h2 class="text-xl font-semibold text-slate-900">Direction C — Minimal Data</h2>
+    <p class="text-slate-500 text-sm mt-1">Ultra-clean and sparse. Maximum whitespace. Numbers are the only visual element. Almost no chrome. Very premium, "luxury brand" feel.</p>
+  </div>
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <div>
+      <div class="mockup-label">Consumer Dashboard · Mobile</div>
+      <div class="bg-white rounded-2xl shadow-lg overflow-hidden" style="max-width:390px">
+        <!-- Minimal header -->
+        <div class="px-6 pt-8 pb-4">
+          <div class="flex items-center gap-2 mb-6">
+            <div class="w-6 h-6 bg-slate-900 rounded flex items-center justify-center"><span class="text-white text-xs font-bold">★</span></div>
+            <span class="text-slate-500 text-sm">Sunrise Motors</span>
+          </div>
+          <div class="text-slate-400 text-xs tracking-widest uppercase mb-2">2021 Ford Explorer</div>
+          <div class="text-5xl font-bold text-slate-900 font-tabular">$28,400</div>
+          <div class="text-xs text-slate-400 mt-2">Current market value · JD Power · Updated today</div>
+        </div>
+
+        <div class="border-t border-slate-100 mx-6"></div>
+
+        <div class="px-6 py-5 space-y-5">
+          <div class="flex justify-between items-center">
+            <div>
+              <div class="text-xs text-slate-400 uppercase tracking-wide mb-1">Your Equity</div>
+              <div class="text-2xl font-bold text-emerald-600 font-tabular">+$4,200</div>
+            </div>
+            <div class="text-right">
+              <div class="text-xs text-slate-400 uppercase tracking-wide mb-1">Loan Payoff</div>
+              <div class="text-2xl font-bold text-slate-900 font-tabular">$24,200</div>
+            </div>
+          </div>
+
+          <div class="border-t border-slate-100"></div>
+
+          <div>
+            <div class="text-xs text-slate-400 uppercase tracking-wide mb-2">Trade Readiness</div>
+            <div class="flex items-center gap-3">
+              <div class="flex-1 bg-slate-100 rounded-full h-2">
+                <div class="bg-emerald-500 h-2 rounded-full" style="width:75%"></div>
+              </div>
+              <span class="text-sm font-semibold text-emerald-600">75%</span>
+            </div>
+            <div class="text-xs text-slate-400 mt-1">Optimal window in 47 days</div>
+          </div>
+
+          <div class="border-t border-slate-100"></div>
+
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="text-xs text-slate-400 uppercase tracking-wide mb-1">Active Recalls</div>
+              <div class="text-sm font-semibold text-amber-600">1 recall · Fuel pump</div>
+            </div>
+            <button class="text-xs text-slate-600 border border-slate-200 px-3 py-1.5 rounded-lg hover:bg-slate-50">Schedule →</button>
+          </div>
+        </div>
+
+        <div class="px-6 pb-6">
+          <button class="w-full border border-slate-200 text-slate-600 text-xs py-2.5 rounded-xl hover:bg-slate-50 font-medium">Create account to keep tracking</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dealer minimal -->
+    <div>
+      <div class="mockup-label">Dealer Portal · Desktop</div>
+      <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+        <div class="flex h-96">
+          <div class="w-48 border-r border-slate-100 flex-shrink-0 p-5">
+            <div class="text-slate-900 font-bold text-sm mb-6">Jupiter</div>
+            <div class="space-y-3 text-xs">
+              <div class="text-slate-900 font-semibold">Analytics</div>
+              <div class="text-slate-400">Campaigns</div>
+              <div class="text-slate-400">Consumers</div>
+              <div class="text-slate-400">DMS Sync</div>
+              <div class="pt-3 border-t border-slate-100">
+                <div class="text-slate-400">Branding</div>
+              </div>
+              <div class="text-slate-400">Billing</div>
+            </div>
+          </div>
+          <div class="flex-1 p-6">
+            <div class="text-xl font-bold text-slate-900 mb-1">Analytics</div>
+            <div class="text-xs text-slate-400 mb-5">Sunrise Motors · 30 days</div>
+            <div class="grid grid-cols-4 gap-4 mb-5">
+              <div class="border-b-2 border-slate-900 pb-2">
+                <div class="text-2xl font-bold font-tabular">34%</div>
+                <div class="text-xs text-slate-400 mt-0.5">Open rate</div>
+              </div>
+              <div class="border-b-2 border-slate-200 pb-2">
+                <div class="text-2xl font-bold font-tabular">147</div>
+                <div class="text-xs text-slate-400 mt-0.5">Active consumers</div>
+              </div>
+              <div class="border-b-2 border-emerald-500 pb-2">
+                <div class="text-2xl font-bold text-emerald-600 font-tabular">12</div>
+                <div class="text-xs text-emerald-500 mt-0.5">Green zone</div>
+              </div>
+              <div class="border-b-2 border-slate-200 pb-2">
+                <div class="text-2xl font-bold font-tabular">3</div>
+                <div class="text-xs text-slate-400 mt-0.5">Leads</div>
+              </div>
+            </div>
+            <table class="w-full text-xs">
+              <thead><tr class="border-b border-slate-100">
+                <th class="text-left py-2 text-slate-400 font-normal">Consumer</th>
+                <th class="text-left py-2 text-slate-400 font-normal">Vehicle</th>
+                <th class="text-left py-2 text-slate-400 font-normal">Timer</th>
+                <th class="text-left py-2 text-slate-400 font-normal">Visits</th>
+              </tr></thead>
+              <tbody class="divide-y divide-slate-50 text-xs">
+                <tr><td class="py-2.5 font-medium">Marcus T.</td><td class="py-2.5 text-slate-400">2021 Explorer</td><td class="py-2.5 text-emerald-600 font-medium">● 47 days</td><td class="py-2.5 font-medium">4</td></tr>
+                <tr><td class="py-2.5 font-medium">Sarah K.</td><td class="py-2.5 text-slate-400">2020 CR-V</td><td class="py-2.5 text-emerald-600 font-medium">● 12 days</td><td class="py-2.5 font-medium">3</td></tr>
+                <tr><td class="py-2.5 font-medium">David R.</td><td class="py-2.5 text-slate-400">2019 RAV4</td><td class="py-2.5 text-amber-500 font-medium">● 68 days</td><td class="py-2.5 font-medium">2</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- DIRECTION D: Warm Welcome -->
+<!-- ============================================================ -->
+<div id="dir-4" class="direction-panel">
+  <div class="mb-6">
+    <h2 class="text-xl font-semibold text-slate-900">Direction D — Warm Welcome</h2>
+    <p class="text-slate-500 text-sm mt-1">Personalised greeting, soft gradients, friendly copy. Feels like a message from the dealer, not a data dashboard. Warmer and more conversational tone.</p>
+  </div>
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <div>
+      <div class="mockup-label">Consumer Dashboard · Mobile</div>
+      <div class="bg-white rounded-2xl shadow-lg overflow-hidden" style="max-width:390px">
+        <!-- Warm header -->
+        <div class="bg-gradient-to-br from-blue-600 to-blue-800 px-5 pt-6 pb-8">
+          <div class="flex items-center gap-2 mb-4">
+            <div class="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow">
+              <span class="text-blue-600 font-bold text-xs">★</span>
+            </div>
+            <span class="text-white font-semibold">Sunrise Motors</span>
+          </div>
+          <div class="text-blue-100 text-sm mb-1">Hi Marcus, here's your vehicle update</div>
+          <div class="text-white/80 text-xs">Your 2021 Ford Explorer · Updated today</div>
+        </div>
+
+        <!-- Cards with negative margin overlap -->
+        <div class="px-4 -mt-4 space-y-3 pb-5">
+          <div class="bg-white rounded-2xl p-5 shadow-md">
+            <div class="text-xs text-slate-500 mb-1">Your car is worth</div>
+            <div class="text-4xl font-bold text-slate-900 font-tabular mb-2">$28,400</div>
+            <div class="flex items-center gap-2">
+              <span class="bg-emerald-100 text-emerald-700 text-xs px-2 py-0.5 rounded-full font-medium">↑ Up $1,200 this month</span>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div class="bg-emerald-50 rounded-xl p-3 border border-emerald-100">
+              <div class="text-xs text-emerald-600 mb-1">You have equity of</div>
+              <div class="text-2xl font-bold text-emerald-700 font-tabular">$4,200</div>
+            </div>
+            <div class="bg-slate-50 rounded-xl p-3 border border-slate-100">
+              <div class="text-xs text-slate-500 mb-1">You owe</div>
+              <div class="text-2xl font-bold text-slate-800 font-tabular">$24,200</div>
+            </div>
+          </div>
+
+          <div class="bg-blue-50 rounded-xl p-4 border border-blue-100">
+            <div class="text-xs text-blue-600 font-medium mb-1">🟢 Good news on your Trade Timer</div>
+            <div class="text-sm font-semibold text-slate-900">You're entering the best time to trade in about 47 days.</div>
+            <div class="text-xs text-slate-500 mt-1">We'll let you know when the window opens.</div>
+          </div>
+
+          <div class="bg-amber-50 rounded-xl p-3 border border-amber-100 flex gap-3 items-start">
+            <span class="text-amber-500 text-base">⚠</span>
+            <div>
+              <div class="text-xs font-semibold text-slate-800">There's an open recall on your vehicle</div>
+              <div class="text-xs text-slate-500">Fuel pump module · It's a quick fix at our service centre</div>
+              <button class="mt-1.5 text-xs text-blue-600 font-medium">Book a service appointment →</button>
+            </div>
+          </div>
+
+          <div class="text-center pt-1">
+            <button class="text-xs text-blue-600 font-medium">Create account to track changes over time →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dealer Warm -->
+    <div>
+      <div class="mockup-label">Dealer Portal · Desktop</div>
+      <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+        <div class="flex h-96">
+          <div class="w-52 bg-slate-800 flex-shrink-0 p-4">
+            <div class="flex items-center gap-2 mb-6">
+              <div class="w-7 h-7 bg-blue-500 rounded-lg flex items-center justify-center">
+                <span class="text-white font-bold text-sm">J</span>
+              </div>
+              <span class="text-white font-semibold text-sm">Jupiter</span>
+            </div>
+            <div class="space-y-1 text-xs">
+              <div class="px-2 py-2 rounded-lg bg-blue-600 text-white font-medium">📊 Analytics</div>
+              <div class="px-2 py-2 rounded-lg text-slate-400">✉ Campaigns</div>
+              <div class="px-2 py-2 rounded-lg text-slate-400">👥 Consumers</div>
+              <div class="px-2 py-2 rounded-lg text-slate-400">🔄 DMS Sync</div>
+              <div class="border-t border-slate-700 my-2"></div>
+              <div class="px-2 py-2 rounded-lg text-slate-400">🎨 Branding</div>
+              <div class="px-2 py-2 rounded-lg text-slate-400">💳 Billing</div>
+            </div>
+          </div>
+          <div class="flex-1 p-5 bg-slate-50">
+            <div class="mb-4">
+              <div class="text-base font-semibold text-slate-900">Good morning, Sunrise Motors 👋</div>
+              <div class="text-xs text-slate-400">Here's how your last campaign performed</div>
+            </div>
+            <div class="grid grid-cols-4 gap-3 mb-4">
+              <div class="bg-white rounded-xl p-3 shadow-sm border border-slate-100 text-center">
+                <div class="text-2xl font-bold text-slate-900">34%</div>
+                <div class="text-xs text-slate-400 mt-0.5">Open rate</div>
+              </div>
+              <div class="bg-white rounded-xl p-3 shadow-sm border border-slate-100 text-center">
+                <div class="text-2xl font-bold text-slate-900">147</div>
+                <div class="text-xs text-slate-400 mt-0.5">Active consumers</div>
+              </div>
+              <div class="bg-emerald-50 rounded-xl p-3 shadow-sm border border-emerald-200 text-center">
+                <div class="text-2xl font-bold text-emerald-700">12</div>
+                <div class="text-xs text-emerald-500 mt-0.5">Ready to trade</div>
+              </div>
+              <div class="bg-white rounded-xl p-3 shadow-sm border border-slate-100 text-center">
+                <div class="text-2xl font-bold text-blue-600">3</div>
+                <div class="text-xs text-slate-400 mt-0.5">Hot leads</div>
+              </div>
+            </div>
+            <div class="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
+              <div class="px-4 py-2.5 border-b border-slate-50 text-xs font-semibold text-slate-700">Consumers to call today</div>
+              <table class="w-full text-xs"><tbody class="divide-y divide-slate-50">
+                <tr class="hover:bg-slate-50"><td class="px-4 py-2.5 font-medium text-slate-900">Marcus T.</td><td class="px-4 py-2.5 text-slate-400">2021 Explorer</td><td class="px-4 py-2.5"><span class="text-emerald-600 font-medium">●  Green · 47 days</span></td><td class="px-4 py-2.5 text-slate-500">4 visits</td></tr>
+                <tr class="hover:bg-slate-50"><td class="px-4 py-2.5 font-medium text-slate-900">Sarah K.</td><td class="px-4 py-2.5 text-slate-400">2020 CR-V</td><td class="px-4 py-2.5"><span class="text-emerald-600 font-medium">●  Green · 12 days</span></td><td class="px-4 py-2.5 text-slate-500">3 visits</td></tr>
+              </tbody></table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- DIRECTION E: Command Center (Dealer-focused) -->
+<!-- ============================================================ -->
+<div id="dir-5" class="direction-panel">
+  <div class="mb-6">
+    <h2 class="text-xl font-semibold text-slate-900">Direction E — Command Center</h2>
+    <p class="text-slate-500 text-sm mt-1">Dealer-portal focused. Dense analytics, prominent campaign metrics at a glance. Power-user dealer experience. Consumer dashboard remains clean card layout.</p>
+  </div>
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <div>
+      <div class="mockup-label">Consumer Dashboard · Mobile</div>
+      <div class="bg-white rounded-2xl shadow-lg overflow-hidden" style="max-width:390px">
+        <div class="bg-slate-900 px-5 pt-5 pb-5">
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-2">
+              <div class="w-7 h-7 bg-blue-500 rounded-lg flex items-center justify-center"><span class="text-white text-xs font-bold">★</span></div>
+              <span class="text-white font-semibold text-sm">Sunrise Motors</span>
+            </div>
+          </div>
+          <div class="text-white/60 text-xs mb-0.5">2021 Ford Explorer</div>
+          <div class="text-white text-4xl font-bold font-tabular">$28,400</div>
+          <div class="text-emerald-400 text-xs mt-1">↑ $1,200 · JD Power</div>
+        </div>
+        <div class="p-4 space-y-3">
+          <div class="grid grid-cols-2 gap-3">
+            <div class="bg-emerald-50 rounded-xl p-3 border border-emerald-200">
+              <div class="text-xs text-emerald-600">EQUITY</div>
+              <div class="text-xl font-bold text-emerald-700 font-tabular">+$4,200</div>
+            </div>
+            <div class="bg-slate-50 rounded-xl p-3 border border-slate-200">
+              <div class="text-xs text-slate-500">PAYOFF</div>
+              <div class="text-xl font-bold text-slate-800 font-tabular">$24,200</div>
+            </div>
+          </div>
+          <div class="bg-slate-50 rounded-xl p-3 border border-slate-200 flex items-center justify-between">
+            <div>
+              <div class="text-xs text-slate-500">TRADE TIMER</div>
+              <div class="font-semibold text-slate-900 text-sm">47 days to optimal</div>
+            </div>
+            <div class="bg-emerald-500 text-white text-xs px-2 py-1 rounded-full font-medium">Green</div>
+          </div>
+          <div class="bg-amber-50 rounded-xl p-3 border border-amber-200 flex items-center justify-between">
+            <div class="text-xs"><span class="font-semibold text-amber-800">Recall: Fuel pump</span><br/><span class="text-amber-600">Book service with Sunrise Motors</span></div>
+            <button class="bg-amber-500 text-white text-xs px-2 py-1 rounded-lg">Book</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Command Center Portal -->
+    <div>
+      <div class="mockup-label">Dealer Portal · Desktop (Command Center)</div>
+      <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+        <div class="flex h-96">
+          <div class="w-48 bg-slate-950 flex-shrink-0 p-3">
+            <div class="flex items-center gap-2 mb-5">
+              <div class="w-6 h-6 bg-blue-500 rounded flex items-center justify-center"><span class="text-white text-xs font-bold">J</span></div>
+              <span class="text-white font-bold text-sm">Jupiter</span>
+            </div>
+            <div class="space-y-0.5 text-xs">
+              <div class="px-2 py-2 rounded-md bg-blue-600/30 text-blue-300 border border-blue-600/50 font-medium">Analytics</div>
+              <div class="px-2 py-2 rounded-md text-slate-500">Campaigns</div>
+              <div class="px-2 py-2 rounded-md text-slate-500">Consumers</div>
+              <div class="px-2 py-2 rounded-md text-slate-500">DMS Sync</div>
+              <div class="border-t border-slate-800 my-2"></div>
+              <div class="px-2 py-2 rounded-md text-slate-500">Branding</div>
+              <div class="px-2 py-2 rounded-md text-slate-500">Billing</div>
+            </div>
+          </div>
+          <div class="flex-1 overflow-hidden">
+            <!-- Top metrics bar -->
+            <div class="bg-slate-900 grid grid-cols-5 text-center">
+              <div class="py-3 border-r border-slate-700"><div class="text-white font-bold text-base font-tabular">34%</div><div class="text-slate-400 text-xs">Open rate</div></div>
+              <div class="py-3 border-r border-slate-700"><div class="text-white font-bold text-base font-tabular">147</div><div class="text-slate-400 text-xs">Active</div></div>
+              <div class="py-3 border-r border-emerald-800 bg-emerald-900/30"><div class="text-emerald-400 font-bold text-base font-tabular">12</div><div class="text-emerald-600 text-xs">Green zone</div></div>
+              <div class="py-3 border-r border-slate-700"><div class="text-white font-bold text-base font-tabular">3</div><div class="text-slate-400 text-xs">Leads</div></div>
+              <div class="py-3"><div class="text-blue-400 font-bold text-base">●</div><div class="text-slate-400 text-xs">Synced</div></div>
+            </div>
+            <!-- Table -->
+            <div class="p-3">
+              <div class="flex items-center gap-2 mb-2">
+                <span class="text-xs font-semibold text-slate-700">Consumer Engagement</span>
+                <div class="flex gap-1">
+                  <span class="bg-emerald-100 text-emerald-700 text-xs px-2 py-0.5 rounded-full">Green: 12</span>
+                  <span class="bg-amber-100 text-amber-700 text-xs px-2 py-0.5 rounded-full">Amber: 34</span>
+                </div>
+              </div>
+              <table class="w-full text-xs">
+                <thead><tr class="border-b border-slate-100 text-slate-400 font-normal">
+                  <th class="text-left py-1.5 font-normal">Consumer</th><th class="text-left py-1.5 font-normal">Vehicle</th><th class="text-left py-1.5 font-normal">Timer</th><th class="text-left py-1.5 font-normal">Visits</th><th class="text-left py-1.5 font-normal">Last</th>
+                </tr></thead>
+                <tbody class="divide-y divide-slate-50">
+                  <tr class="bg-emerald-50/50"><td class="py-2 font-medium text-slate-900">Marcus T.</td><td class="py-2 text-slate-500">Explorer '21</td><td class="py-2"><span class="bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded font-medium text-xs">● 47d</span></td><td class="py-2 font-bold">4</td><td class="py-2 text-slate-400">Today</td></tr>
+                  <tr class="bg-emerald-50/50"><td class="py-2 font-medium text-slate-900">Sarah K.</td><td class="py-2 text-slate-500">CR-V '20</td><td class="py-2"><span class="bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded font-medium text-xs">● 12d</span></td><td class="py-2 font-bold">3</td><td class="py-2 text-slate-400">Yest.</td></tr>
+                  <tr><td class="py-2 font-medium text-slate-900">David R.</td><td class="py-2 text-slate-500">RAV4 '19</td><td class="py-2"><span class="bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded font-medium text-xs">● 68d</span></td><td class="py-2 font-bold">2</td><td class="py-2 text-slate-400">2d</td></tr>
+                  <tr><td class="py-2 text-slate-600">Lisa M.</td><td class="py-2 text-slate-400">Camry '22</td><td class="py-2"><span class="bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded text-xs">● 94d</span></td><td class="py-2">1</td><td class="py-2 text-slate-400">5d</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- DIRECTION F: Sales Ready -->
+<!-- ============================================================ -->
+<div id="dir-6" class="direction-panel">
+  <div class="mb-6">
+    <h2 class="text-xl font-semibold text-slate-900">Direction F — Sales Ready</h2>
+    <p class="text-slate-500 text-sm mt-1">Lead-identification first. The dealer analytics view is split into explicit priority tiers: "Call today", "Call this week", "Monitor". Consumer dashboard is clean and bright.</p>
+  </div>
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <div>
+      <div class="mockup-label">Consumer Dashboard · Mobile</div>
+      <div class="bg-white rounded-2xl shadow-lg overflow-hidden" style="max-width:390px">
+        <div class="bg-white border-b border-slate-100 px-5 pt-5 pb-4">
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 bg-blue-600 rounded-xl flex items-center justify-center shadow-sm"><span class="text-white text-xs font-bold">★</span></div>
+            <div>
+              <div class="text-sm font-semibold text-slate-900">Sunrise Motors</div>
+              <div class="text-xs text-slate-400">Your Vehicle Report</div>
+            </div>
+          </div>
+        </div>
+        <div class="px-5 py-4 bg-blue-600 text-white">
+          <div class="text-blue-100 text-xs mb-0.5">2021 Ford Explorer · Market Value</div>
+          <div class="text-4xl font-bold font-tabular">$28,400</div>
+          <div class="flex items-center gap-2 mt-2">
+            <span class="bg-white/20 text-white text-xs px-2 py-0.5 rounded-full">↑ $1,200 this month</span>
+            <span class="text-blue-200 text-xs">JD Power</span>
+          </div>
+        </div>
+        <div class="p-4 space-y-3">
+          <div class="grid grid-cols-2 gap-3">
+            <div class="rounded-xl p-3 bg-emerald-50 border border-emerald-200">
+              <div class="text-xs text-emerald-600 font-medium">EQUITY</div>
+              <div class="text-2xl font-bold text-emerald-700 font-tabular">$4,200</div>
+              <div class="text-xs text-emerald-500">Positive</div>
+            </div>
+            <div class="rounded-xl p-3 bg-slate-50 border border-slate-200">
+              <div class="text-xs text-slate-500 font-medium">PAYOFF</div>
+              <div class="text-2xl font-bold text-slate-800 font-tabular">$24,200</div>
+              <div class="text-xs text-slate-400">Remaining</div>
+            </div>
+          </div>
+          <div class="rounded-xl p-4 bg-white border border-emerald-200 shadow-sm">
+            <div class="flex items-center gap-2 mb-1">
+              <div class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
+              <span class="text-xs font-semibold text-emerald-700">Trade Timer — Green Zone in 47 days</span>
+            </div>
+            <div class="w-full bg-slate-100 rounded-full h-2 mt-2">
+              <div class="bg-emerald-500 h-2 rounded-full transition-all" style="width:75%"></div>
+            </div>
+            <div class="text-xs text-slate-400 mt-1.5">75% of the way to your optimal trade window</div>
+          </div>
+          <div class="rounded-xl p-3 bg-amber-50 border border-amber-200 flex items-center justify-between">
+            <div>
+              <div class="text-xs font-semibold text-amber-800">⚠ Recall: Fuel pump module</div>
+              <div class="text-xs text-amber-600">Schedule at Sunrise Motors</div>
+            </div>
+            <button class="bg-amber-500 text-white text-xs px-3 py-1.5 rounded-lg font-medium">Book</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sales Ready Portal -->
+    <div>
+      <div class="mockup-label">Dealer Portal · Desktop (Sales Ready)</div>
+      <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+        <div class="flex h-96">
+          <div class="w-52 bg-white border-r border-slate-200 flex-shrink-0 p-4">
+            <div class="flex items-center gap-2 mb-5">
+              <div class="w-7 h-7 bg-blue-600 rounded-lg flex items-center justify-center"><span class="text-white font-bold text-sm">J</span></div>
+              <span class="font-bold text-slate-900 text-sm">Jupiter</span>
+            </div>
+            <div class="space-y-1 text-xs">
+              <div class="px-2 py-2 rounded-lg bg-blue-50 text-blue-700 border border-blue-200 font-semibold">Analytics</div>
+              <div class="px-2 py-2 text-slate-500">Campaigns</div>
+              <div class="px-2 py-2 text-slate-500">Consumers</div>
+              <div class="px-2 py-2 text-slate-500">DMS Sync</div>
+              <div class="border-t border-slate-100 my-2"></div>
+              <div class="px-2 py-2 text-slate-400">Branding</div>
+              <div class="px-2 py-2 text-slate-400">Billing</div>
+            </div>
+            <div class="absolute bottom-4 left-4 right-4 max-w-[160px]">
+              <div class="bg-slate-50 rounded-lg p-2.5 border border-slate-200 text-xs">
+                <div class="flex items-center gap-1.5 text-emerald-600 font-medium mb-1">
+                  <div class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></div>DMS Live
+                </div>
+                <div class="text-slate-400">Last sync 2h ago</div>
+              </div>
+            </div>
+          </div>
+          <div class="flex-1 p-4 overflow-hidden bg-slate-50">
+            <!-- Priority tiers -->
+            <div class="text-sm font-semibold text-slate-900 mb-3">Lead Priority · Today</div>
+            <div class="space-y-2">
+              <!-- Call today -->
+              <div class="bg-white rounded-xl border border-emerald-200 overflow-hidden">
+                <div class="bg-emerald-500 px-3 py-1.5 flex items-center justify-between">
+                  <span class="text-white text-xs font-bold">● CALL TODAY</span>
+                  <span class="text-white/80 text-xs">2 consumers</span>
+                </div>
+                <table class="w-full text-xs"><tbody>
+                  <tr class="border-b border-slate-50"><td class="px-3 py-2 font-medium text-slate-900">Marcus T.</td><td class="px-3 py-2 text-slate-500">Explorer '21</td><td class="px-3 py-2"><span class="text-emerald-600 font-medium">47d · 4 visits</span></td></tr>
+                  <tr><td class="px-3 py-2 font-medium text-slate-900">Sarah K.</td><td class="px-3 py-2 text-slate-500">CR-V '20</td><td class="px-3 py-2"><span class="text-emerald-600 font-medium">12d · 3 visits</span></td></tr>
+                </tbody></table>
+              </div>
+              <!-- Call this week -->
+              <div class="bg-white rounded-xl border border-amber-200 overflow-hidden">
+                <div class="bg-amber-400 px-3 py-1.5 flex items-center justify-between">
+                  <span class="text-white text-xs font-bold">● CALL THIS WEEK</span>
+                  <span class="text-white/80 text-xs">4 consumers</span>
+                </div>
+                <table class="w-full text-xs"><tbody>
+                  <tr class="border-b border-slate-50"><td class="px-3 py-2 font-medium text-slate-900">David R.</td><td class="px-3 py-2 text-slate-500">RAV4 '19</td><td class="px-3 py-2 text-amber-600">68d · 2 visits</td></tr>
+                  <tr><td class="px-3 py-2 text-slate-600">Lisa M.</td><td class="px-3 py-2 text-slate-400">Camry '22</td><td class="px-3 py-2 text-amber-600">94d · 1 visit</td></tr>
+                </tbody></table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- end max-w-7xl -->
+
+<!-- Notes -->
+<div class="max-w-7xl mx-auto px-6 py-6 mt-4 border-t border-slate-200">
+  <div class="text-xs text-slate-400 text-center">Jupiter UX Design Directions · Rider / Nebula Technologies · 2026-03-23 · Directions A–F for review</div>
+</div>
+
+<script>
+function showDirection(n) {
+  document.querySelectorAll('.direction-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => {
+    b.classList.remove('active');
+    b.classList.add('bg-white', 'text-slate-600');
+    b.classList.remove('text-white');
+  });
+  document.getElementById('dir-' + n).classList.add('active');
+  const btn = document.getElementById('tab-' + n);
+  btn.classList.add('active');
+  btn.classList.remove('bg-white', 'text-slate-600');
+}
+</script>
+</body>
+</html>
