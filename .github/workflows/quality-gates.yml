@@ -1,0 +1,167 @@
+name: Quality Gates
+
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: quality-gates-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  prisma-migration-safety:
+    name: Prisma migration safety
+    runs-on: ubuntu-latest
+    services:
+      prisma-shadow-db:
+        image: postgres:16
+        env:
+          POSTGRES_DB: prisma_shadow
+          POSTGRES_USER: prisma
+          POSTGRES_PASSWORD: prisma
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U prisma -d prisma_shadow"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      SHADOW_DATABASE_URL: postgresql://prisma:prisma@127.0.0.1:5432/prisma_shadow?schema=public
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: jupiter/pnpm-lock.yaml
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        working-directory: jupiter
+        run: pnpm install --frozen-lockfile
+
+      - name: Run Prisma migration safety check
+        working-directory: jupiter
+        run: pnpm run ci:prisma
+
+  vitest-unit-tests:
+    name: Vitest unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: jupiter/pnpm-lock.yaml
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        working-directory: jupiter
+        run: pnpm install --frozen-lockfile
+
+      - name: Run Vitest suite
+        working-directory: jupiter
+        run: pnpm run ci:test
+
+  accessibility-smoke-tests:
+    name: Accessibility smoke tests
+    runs-on: ubuntu-latest
+    env:
+      AUTH_SECRET: ci-auth-secret-with-32-plus-characters
+      BASE_URL: http://127.0.0.1:3001
+      DATABASE_URL: postgresql://ci:ci@127.0.0.1:5432/rider?sslmode=disable
+      DIRECT_URL: postgresql://ci:ci@127.0.0.1:5432/rider?sslmode=disable
+      STRIPE_SECRET_KEY: sk_test_ci_placeholder
+      STRIPE_WEBHOOK_SECRET: whsec_ci_placeholder
+      GOOGLE_CLIENT_ID: ci-google-client-id
+      GOOGLE_CLIENT_SECRET: ci-google-client-secret
+      APPLE_CLIENT_ID: ci-apple-client-id
+      APPLE_TEAM_ID: ci-apple-team-id
+      APPLE_KEY_ID: ci-apple-key-id
+      APPLE_PRIVATE_KEY: |
+        -----BEGIN PRIVATE KEY-----
+        ci-placeholder
+        -----END PRIVATE KEY-----
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: jupiter/pnpm-lock.yaml
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        working-directory: jupiter
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright Chromium
+        working-directory: jupiter
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Run accessibility smoke tests
+        working-directory: jupiter
+        run: pnpm run ci:a11y
+
+  nextjs-production-build:
+    name: Next.js production build
+    runs-on: ubuntu-latest
+    env:
+      AUTH_SECRET: ci-auth-secret-with-32-plus-characters
+      BASE_URL: http://127.0.0.1:3000
+      DATABASE_URL: postgresql://ci:ci@127.0.0.1:5432/rider?sslmode=disable
+      DIRECT_URL: postgresql://ci:ci@127.0.0.1:5432/rider?sslmode=disable
+      STRIPE_SECRET_KEY: sk_test_ci_placeholder
+      STRIPE_WEBHOOK_SECRET: whsec_ci_placeholder
+      GOOGLE_CLIENT_ID: ci-google-client-id
+      GOOGLE_CLIENT_SECRET: ci-google-client-secret
+      APPLE_CLIENT_ID: ci-apple-client-id
+      APPLE_TEAM_ID: ci-apple-team-id
+      APPLE_KEY_ID: ci-apple-key-id
+      APPLE_PRIVATE_KEY: |
+        -----BEGIN PRIVATE KEY-----
+        ci-placeholder
+        -----END PRIVATE KEY-----
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: jupiter/pnpm-lock.yaml
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        working-directory: jupiter
+        run: pnpm install --frozen-lockfile
+
+      - name: Run production build
+        working-directory: jupiter
+        run: pnpm run ci:build
