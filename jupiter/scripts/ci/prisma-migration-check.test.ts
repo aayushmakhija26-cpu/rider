@@ -17,7 +17,7 @@ describe('prisma migration check messaging', () => {
   it('guides reviewers to inspect workflow setup when Prisma fails unexpectedly', () => {
     const message = buildFailureMessage(1, 'Unexpected failure')
 
-    expect(message).toContain('repair the workflow')
+    expect(message).toContain('Prisma command execution error')
     expect(message).toContain('Unexpected failure')
   })
 })
