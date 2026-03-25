@@ -85,8 +85,38 @@ jobs:
         working-directory: jupiter
         run: pnpm run ci:test
 
+  a11y-route-coverage:
+    name: Validate accessibility test route coverage
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Validate required public routes are tested
+        working-directory: jupiter
+        run: |
+          SPEC="tests/a11y/public-routes.spec.ts"
+          REQUIRED_ROUTES=('/' '/pricing' '/sign-in' '/sign-up' '/unauthorized')
+          MISSING_ROUTES=()
+
+          for route in "${REQUIRED_ROUTES[@]}"; do
+            if ! grep -qF "\"$route\"" "$SPEC"; then
+              MISSING_ROUTES+=("$route")
+            fi
+          done
+
+          if [ ${#MISSING_ROUTES[@]} -gt 0 ]; then
+            echo "✗ Missing required accessibility test routes:"
+            for route in "${MISSING_ROUTES[@]}"; do
+              echo "  - $route"
+            done
+            exit 1
+          fi
+          echo "✓ All required accessibility test routes present"
+
   accessibility-smoke-tests:
     name: Accessibility smoke tests
+    needs: a11y-route-coverage
     runs-on: ubuntu-latest
     env:
       AUTH_SECRET: ci-auth-secret-with-32-plus-characters
@@ -174,3 +204,168 @@ jobs:
       - name: Run production build
         working-directory: jupiter
         run: pnpm run ci:build
+
+  verify-vercel-preview:
+    name: Verify Vercel Preview deployment
+    if: github.event_name == 'pull_request'
+    needs: [prisma-migration-safety, vitest-unit-tests, accessibility-smoke-tests, nextjs-production-build]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Extract Vercel project info
+        id: vercel
+        run: |
+          PROJECT_ID=$(jq -r '.projectId' .vercel/project.json)
+          ORG_ID=$(jq -r '.orgId' .vercel/project.json)
+          echo "projectId=$PROJECT_ID" >> $GITHUB_OUTPUT
+          echo "orgId=$ORG_ID" >> $GITHUB_OUTPUT
+          echo "branch=${{ github.head_ref }}" >> $GITHUB_OUTPUT
+
+      - name: Check for VERCEL_TOKEN
+        id: token-check
+        run: |
+          if [ -z "${{ secrets.VERCEL_TOKEN }}" ]; then
+            echo "has_token=false" >> $GITHUB_OUTPUT
+          else
+            echo "has_token=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Skip verification (no VERCEL_TOKEN configured)
+        if: steps.token-check.outputs.has_token == 'false'
+        run: |
+          echo "⚠ VERCEL_TOKEN not configured in GitHub Actions secrets."
+          echo "✓ Vercel Preview verification skipped (graceful degradation)."
+          echo "To enable verification, create a Vercel token at https://vercel.com/account/tokens"
+          echo "and add it as VERCEL_TOKEN to GitHub Actions secrets."
+
+      - name: Poll Vercel API for Preview deployment status
+        if: steps.token-check.outputs.has_token == 'true'
+        timeout-minutes: 10
+        run: |
+          PROJECT_ID="${{ steps.vercel.outputs.projectId }}"
+          ORG_ID="${{ steps.vercel.outputs.orgId }}"
+          BRANCH="${{ steps.vercel.outputs.branch }}"
+          VERCEL_TOKEN="${{ secrets.VERCEL_TOKEN }}"
+
+          # Poll for deployment every 20s, up to 10 minutes
+          ELAPSED=0
+          POLL_INTERVAL=20
+          MAX_TIME=600
+
+          while [ $ELAPSED -lt $MAX_TIME ]; do
+            RESPONSE=$(curl -s -H "Authorization: Bearer $VERCEL_TOKEN" \
+              "https://api.vercel.com/v6/deployments?teamId=$ORG_ID&projectId=$PROJECT_ID&meta-gitBranch=$BRANCH&limit=1")
+
+            STATE=$(echo "$RESPONSE" | jq -r '.deployments[0].state // "UNKNOWN"')
+
+            case "$STATE" in
+              READY)
+                echo "✓ Vercel Preview deployment ready"
+                exit 0
+                ;;
+              ERROR)
+                echo "✗ Vercel Preview deployment failed"
+                echo "$RESPONSE" | jq '.deployments[0]'
+                exit 1
+                ;;
+              CANCELED)
+                echo "✗ Vercel Preview deployment was canceled"
+                echo "$RESPONSE" | jq '.deployments[0]'
+                exit 1
+                ;;
+              BUILDING|INITIALIZING|QUEUED)
+                echo "... Deployment state: $STATE (elapsed: ${ELAPSED}s)"
+                sleep $POLL_INTERVAL
+                ELAPSED=$((ELAPSED + POLL_INTERVAL))
+                ;;
+              *)
+                echo "? Deployment state: $STATE (elapsed: ${ELAPSED}s)"
+                sleep $POLL_INTERVAL
+                ELAPSED=$((ELAPSED + POLL_INTERVAL))
+                ;;
+            esac
+          done
+
+          echo "✗ Vercel Preview deployment verification timed out after 10 minutes"
+          exit 1
+
+  verify-vercel-env-config:
+    name: Verify Vercel environment variable configuration
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Extract Vercel project info
+        id: vercel
+        run: |
+          PROJECT_ID=$(jq -r '.projectId' .vercel/project.json)
+          ORG_ID=$(jq -r '.orgId' .vercel/project.json)
+          echo "projectId=$PROJECT_ID" >> $GITHUB_OUTPUT
+          echo "orgId=$ORG_ID" >> $GITHUB_OUTPUT
+
+      - name: Check for VERCEL_TOKEN
+        id: token-check
+        run: |
+          if [ -z "${{ secrets.VERCEL_TOKEN }}" ]; then
+            echo "has_token=false" >> $GITHUB_OUTPUT
+          else
+            echo "has_token=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Skip verification (no VERCEL_TOKEN configured)
+        if: steps.token-check.outputs.has_token == 'false'
+        run: |
+          echo "⚠ VERCEL_TOKEN not configured in GitHub Actions secrets."
+          echo "✓ Vercel environment variable verification skipped (graceful degradation)."
+          echo "To enable verification, create a Vercel token at https://vercel.com/account/tokens"
+          echo "and add it as VERCEL_TOKEN to GitHub Actions secrets."
+
+      - name: Verify required environment variables are configured in Vercel
+        if: steps.token-check.outputs.has_token == 'true'
+        run: |
+          PROJECT_ID="${{ steps.vercel.outputs.projectId }}"
+          ORG_ID="${{ steps.vercel.outputs.orgId }}"
+          VERCEL_TOKEN="${{ secrets.VERCEL_TOKEN }}"
+
+          REQUIRED_VARS=(
+            "DATABASE_URL"
+            "DIRECT_URL"
+            "AUTH_SECRET"
+            "BASE_URL"
+            "STRIPE_SECRET_KEY"
+            "STRIPE_WEBHOOK_SECRET"
+            "GOOGLE_CLIENT_ID"
+            "GOOGLE_CLIENT_SECRET"
+            "APPLE_CLIENT_ID"
+            "APPLE_TEAM_ID"
+            "APPLE_KEY_ID"
+            "APPLE_PRIVATE_KEY"
+          )
+
+          RESPONSE=$(curl -s -H "Authorization: Bearer $VERCEL_TOKEN" \
+            "https://api.vercel.com/v9/projects/$PROJECT_ID/env?teamId=$ORG_ID")
+
+          MISSING_VARS=()
+
+          for var in "${REQUIRED_VARS[@]}"; do
+            if ! echo "$RESPONSE" | jq -e ".envs[] | select(.key == \"$var\")" > /dev/null 2>&1; then
+              MISSING_VARS+=("$var")
+            fi
+          done
+
+          if [ ${#MISSING_VARS[@]} -gt 0 ]; then
+            echo "⚠ Missing environment variables in Vercel project:"
+            for var in "${MISSING_VARS[@]}"; do
+              echo "  - $var"
+            done
+            echo ""
+            echo "Add these variables to the Vercel project at:"
+            echo "  https://vercel.com/dashboard/project/$PROJECT_ID/settings/environment-variables"
+            exit 1
+          fi
+
+          echo "✓ All required environment variables are configured in Vercel"
