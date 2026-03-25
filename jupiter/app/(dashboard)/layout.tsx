@@ -14,17 +14,17 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { signOut } from '@/app/(login)/actions';
 import { useRouter } from 'next/navigation';
 import { User } from '@/lib/db/schema';
-import useSWR, { mutate } from 'swr';
+import useSWR, { mutate, type Fetcher } from 'swr';
 
-const fetcher = async (url: string): Promise<User | null> => {
-  const response = await fetch(url)
+const fetcher: Fetcher<User | null, string> = async (url) => {
+  const response = await fetch(url);
 
   if (!response.ok) {
-    return null
+    return null;
   }
 
-  return response.json()
-}
+  return response.json();
+};
 
 function getAvatarFallback(user: Pick<User, 'name' | 'email'>) {
   const source = user.name?.trim() || user.email.trim()
@@ -39,7 +39,7 @@ function getAvatarFallback(user: Pick<User, 'name' | 'email'>) {
 
 function UserMenu() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { data: user } = useSWR<User>('/api/user', fetcher);
+  const { data: user } = useSWR<User | null>('/api/user', fetcher);
   const router = useRouter();
 
   async function handleSignOut() {
