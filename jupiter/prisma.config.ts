@@ -17,6 +17,9 @@ if (!migrationUrl) {
     "Set DIRECT_URL in .env.local to your Neon direct connection URL."
   );
 }
+const shadowDatabaseUrl =
+  process.env["SHADOW_DATABASE_URL"] ??
+  process.env["PRISMA_SHADOW_DATABASE_URL"];
 
 export default defineConfig({
   schema: "prisma/schema.prisma",
@@ -25,5 +28,6 @@ export default defineConfig({
   },
   datasource: {
     url: migrationUrl,
+    shadowDatabaseUrl,
   },
 });

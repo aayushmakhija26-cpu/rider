@@ -58,7 +58,6 @@ export async function runPrismaMigrationCheck({
     '--exit-code',
     '--from-migrations=prisma/migrations',
     '--to-schema=prisma/schema.prisma',
-    `--shadow-database-url=${shadowDatabaseUrl}`,
   ], {
     cwd: process.cwd(),
     env: process.env,
