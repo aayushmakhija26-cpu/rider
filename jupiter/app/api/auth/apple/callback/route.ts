@@ -88,7 +88,7 @@ export async function POST(req: NextRequest) {
     const dealerUser = await findOrCreateOAuthUser({ email, name, provider: 'apple', providerId: sub })
     await setSession(dealerUser)
 
-    const redirectRes = NextResponse.redirect(new URL('/dashboard', req.url))
+    const redirectRes = NextResponse.redirect(new URL('/dealer/onboarding', req.url))
     redirectRes.cookies.delete('__oauth_state_apple')
     return redirectRes
   } catch (err) {

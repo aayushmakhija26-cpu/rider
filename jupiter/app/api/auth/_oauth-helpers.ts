@@ -60,6 +60,15 @@ export async function findOrCreateOAuthUser({
       await tx.oAuthAccount.create({
         data: { dealerUserId: dealerUser.id, provider, providerId },
       })
+      // Initialize onboarding steps for the new dealer
+      await tx.onboardingStep.createMany({
+        data: ['branding', 'dms', 'staff', 'billing'].map((stepName) => ({
+          dealerId: dealer.id,
+          stepName,
+          status: 'pending',
+        })),
+        skipDuplicates: true,
+      })
       return dealerUser
     })
   } catch (error) {
