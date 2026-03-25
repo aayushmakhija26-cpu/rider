@@ -5,6 +5,7 @@
     "dev": "next dev --turbopack",
     "dev:ci": "next dev --hostname 127.0.0.1 --port 3001",
     "start:ci": "next start --hostname 127.0.0.1 --port 3001",
+    "postinstall": "prisma generate",
     "build": "prisma generate && next build",
     "ci:build": "prisma generate && next build",
     "ci:prisma": "node ./scripts/ci/prisma-migration-check.mjs",
