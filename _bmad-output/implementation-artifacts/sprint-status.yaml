@@ -1,5 +1,5 @@
 # generated: 2026-03-23
-# last_updated: 2026-03-24
+# last_updated: 2026-03-25
 # project: Rider
 # project_key: NOKEY
 # tracking_system: file-system
@@ -43,14 +43,14 @@ story_location: "{project-root}/_bmad-output/implementation-artifacts"
 
 development_status:
   # ─── Epic 1: Foundation & Developer Platform Setup ───────────────────────────
-  epic-1: in-progress
+  epic-1: done
   1-1-project-bootstrap-from-starter-template: done
   1-2-prisma-schema-foundation-neon-database-row-level-security: done
   1-3-email-password-authentication-jwt-session-management: done
   1-4-google-apple-oauth-integration: done
   1-5-4-role-rbac-middleware-route-protection: done
   1-6-vercel-deployment-pipeline-github-actions-ci-cd: done
-  1-7-design-token-system-tailwind-configuration: backlog
+  1-7-design-token-system-tailwind-configuration: done
   epic-1-retrospective: optional
 
   # ─── Epic 2: Dealer Registration, Onboarding & Account Management ────────────
