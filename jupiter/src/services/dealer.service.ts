@@ -1,5 +1,6 @@
 import { prisma } from '@/src/lib/db';
 import type { Dealer, DealerUser } from '@prisma/client';
+import { getSafeColour } from '@/src/lib/contrast';
 
 /**
  * Create a Dealer and a DEALER_ADMIN DealerUser atomically.
@@ -51,4 +52,102 @@ export async function findUserByEmail(email: string): Promise<DealerUser | null>
   return prisma.dealerUser.findFirst({
     where: { email },
   });
+}
+
+/**
+ * Update dealer branding configuration (Story 2.3)
+ * Validates all inputs and applies WCAG fallback for colour
+ */
+export async function updateBranding(
+  dealerId: string,
+  logoUrl?: string,
+  primaryColour?: string,
+  contactPhone?: string,
+  contactEmail?: string,
+  websiteUrl?: string
+): Promise<Dealer> {
+  // Validate dealerId exists
+  const dealer = await prisma.dealer.findUnique({
+    where: { id: dealerId },
+  });
+
+  if (!dealer) {
+    throw new Error(`Dealer not found: ${dealerId}`);
+  }
+
+  const data: Record<string, unknown> = {};
+
+  // Validate and add logoUrl
+  if (logoUrl) {
+    const trimmed = logoUrl.trim();
+    if (trimmed && /^https?:\/\/.+/.test(trimmed)) {
+      data.logoUrl = trimmed;
+    }
+  }
+
+  // Validate and add primaryColour with WCAG fallback
+  if (primaryColour) {
+    const trimmed = primaryColour.trim();
+    if (/^#[0-9A-Fa-f]{6}$/.test(trimmed)) {
+      data.primaryColour = getSafeColour(trimmed);
+    }
+  }
+
+  // Validate and add contactPhone
+  if (contactPhone) {
+    const trimmed = contactPhone.trim();
+    if (trimmed) {
+      data.contactPhone = trimmed;
+    }
+  }
+
+  // Validate and add contactEmail
+  if (contactEmail) {
+    const trimmed = contactEmail.trim();
+    if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+      data.contactEmail = trimmed;
+    }
+  }
+
+  // Validate and add websiteUrl
+  if (websiteUrl) {
+    const trimmed = websiteUrl.trim();
+    if (trimmed && /^https?:\/\/.+/.test(trimmed)) {
+      data.websiteUrl = trimmed;
+    }
+  }
+
+  // Only update if we have valid data
+  if (Object.keys(data).length === 0) {
+    return dealer;
+  }
+
+  return prisma.dealer.update({
+    where: { id: dealerId },
+    data,
+  });
+}
+
+/**
+ * Get dealer branding configuration (Story 2.3)
+ * Returns only branding-related fields for preview/display
+ * Throws error if dealer not found
+ */
+export async function getBranding(dealerId: string) {
+  const branding = await prisma.dealer.findUnique({
+    where: { id: dealerId },
+    select: {
+      logoUrl: true,
+      primaryColour: true,
+      contactPhone: true,
+      contactEmail: true,
+      websiteUrl: true,
+    },
+  });
+
+  if (!branding) {
+    throw new Error(`Dealer not found: ${dealerId}`);
+  }
+
+  return branding;
 }

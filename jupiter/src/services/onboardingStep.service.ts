@@ -1,5 +1,6 @@
 import { prisma } from '@/src/lib/db';
 import type { OnboardingStep, OnboardingStatus } from '@prisma/client';
+import { getSafeColour } from '@/src/lib/contrast';
 
 /**
  * Get all onboarding steps for a dealer
@@ -27,6 +28,8 @@ export async function getStep(
  * Update or create an onboarding step (upsert with idempotency)
  * Automatically sets completedAt timestamp when status is 'complete'
  * Automatically sets skippedAt timestamp when status is 'skipped'
+ *
+ * CRITICAL: When branding step completes, syncs data to Dealer model (AC #1)
  */
 export async function updateStep(
   dealerId: string,
@@ -34,7 +37,16 @@ export async function updateStep(
   status: OnboardingStatus,
   data?: Record<string, unknown>
 ): Promise<OnboardingStep> {
-  return prisma.onboardingStep.upsert({
+  // Validate dealerId exists before proceeding
+  const dealer = await prisma.dealer.findUnique({
+    where: { id: dealerId },
+  });
+
+  if (!dealer) {
+    throw new Error(`Dealer not found: ${dealerId}`);
+  }
+
+  const step = await prisma.onboardingStep.upsert({
     where: { dealerId_stepName: { dealerId, stepName } },
     create: {
       dealerId,
@@ -51,6 +63,64 @@ export async function updateStep(
       skippedAt: status === 'skipped' ? new Date() : null,
     },
   });
+
+  // SYNC branding data to Dealer model when step is marked complete (Story 2.3, AC #1)
+  if (stepName === 'branding' && status === 'complete' && data) {
+    const brandingData = data as Record<string, unknown>;
+
+    // Build update payload with validation
+    const updatePayload: Record<string, unknown> = {};
+
+    // Logo URL: trim empty strings, validate basic URL format
+    if (brandingData.logoUrl) {
+      const logoUrl = String(brandingData.logoUrl).trim();
+      if (logoUrl && /^https?:\/\/.+/.test(logoUrl)) {
+        updatePayload.logoUrl = logoUrl;
+      }
+    }
+
+    // Primary colour: validate hex format and apply WCAG fallback
+    if (brandingData.primaryColour) {
+      const colour = String(brandingData.primaryColour).trim();
+      if (/^#[0-9A-Fa-f]{6}$/.test(colour)) {
+        updatePayload.primaryColour = getSafeColour(colour);
+      }
+    }
+
+    // Contact phone: trim empty strings
+    if (brandingData.contactPhone) {
+      const phone = String(brandingData.contactPhone).trim();
+      if (phone) {
+        updatePayload.contactPhone = phone;
+      }
+    }
+
+    // Contact email: trim and validate basic format
+    if (brandingData.contactEmail) {
+      const email = String(brandingData.contactEmail).trim();
+      if (email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        updatePayload.contactEmail = email;
+      }
+    }
+
+    // Website URL: trim empty strings, validate basic URL format
+    if (brandingData.websiteUrl) {
+      const url = String(brandingData.websiteUrl).trim();
+      if (url && /^https?:\/\/.+/.test(url)) {
+        updatePayload.websiteUrl = url;
+      }
+    }
+
+    // Only update if we have valid data
+    if (Object.keys(updatePayload).length > 0) {
+      await prisma.dealer.update({
+        where: { id: dealerId },
+        data: updatePayload,
+      });
+    }
+  }
+
+  return step;
 }
 
 /**
