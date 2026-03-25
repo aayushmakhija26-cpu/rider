@@ -32,6 +32,7 @@ jobs:
           --health-timeout 5s
           --health-retries 5
     env:
+      DIRECT_URL: postgresql://prisma:prisma@127.0.0.1:5432/prisma_shadow?schema=public
       SHADOW_DATABASE_URL: postgresql://prisma:prisma@127.0.0.1:5432/prisma_shadow?schema=public
     steps:
       - name: Checkout repository
