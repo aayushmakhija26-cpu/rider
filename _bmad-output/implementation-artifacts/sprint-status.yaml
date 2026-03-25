@@ -1,5 +1,5 @@
 # generated: 2026-03-23
-# last_updated: 2026-03-25T18:30
+# last_updated: 2026-03-25T19:00
 # project: Rider
 # project_key: NOKEY
 # tracking_system: file-system
@@ -35,7 +35,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: 2026-03-23
-last_updated: 2026-03-25
+last_updated: 2026-03-25T19:00
 project: Rider
 project_key: NOKEY
 tracking_system: file-system
@@ -56,7 +56,7 @@ development_status:
   # ─── Epic 2: Dealer Registration, Onboarding & Account Management ────────────
   epic-2: in-progress
   2-1-dealer-admin-registration: done
-  2-2-dealer-onboarding-checklist: backlog
+  2-2-dealer-onboarding-checklist: done
   2-3-dealership-branding-configuration: backlog
   2-4-dealer-staff-account-management: backlog
   2-5-role-assignment-for-dealer-staff: backlog
