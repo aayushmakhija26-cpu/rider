@@ -39,28 +39,41 @@ export async function findOrCreateOAuthUser({
   // 3. New user — create Dealer + DealerUser + OAuthAccount atomically
   //    The @@unique([provider, providerId]) on OAuthAccount causes one side of a race to fail,
   //    which is caught by the callback and redirected to oauth_failed.
-  return prisma.$transaction(async (tx) => {
-    // Reuse existing Dealer if one already shares this email (edge case)
-    let dealer = await tx.dealer.findFirst({ where: { email } })
-    if (!dealer) {
-      dealer = await tx.dealer.create({
-        data: { name: deriveNameFromEmail(email), email },
+  try {
+    return await prisma.$transaction(async (tx) => {
+      // Reuse existing Dealer if one already shares this email (edge case)
+      let dealer = await tx.dealer.findFirst({ where: { email } })
+      if (!dealer) {
+        dealer = await tx.dealer.create({
+          data: { name: deriveNameFromEmail(email), email },
+        })
+      }
+      const dealerUser = await tx.dealerUser.create({
+        data: {
+          dealerId: dealer.id,
+          email,
+          name: name ?? null,
+          passwordHash: null,
+          role: 'DEALER_ADMIN',
+        },
       })
+      await tx.oAuthAccount.create({
+        data: { dealerUserId: dealerUser.id, provider, providerId },
+      })
+      return dealerUser
+    })
+  } catch (error) {
+    if (
+      error instanceof Error &&
+      'code' in error &&
+      (error as { code: string }).code === 'P2002'
+    ) {
+      // Race condition: two concurrent OAuth requests for same email. The callback
+      // will catch this throw and redirect to /sign-in?error=oauth_failed.
+      throw new Error('OAuth registration conflict: concurrent request won the race')
     }
-    const dealerUser = await tx.dealerUser.create({
-      data: {
-        dealerId: dealer.id,
-        email,
-        name: name ?? null,
-        passwordHash: null,
-        role: 'DEALER_ADMIN',
-      },
-    })
-    await tx.oAuthAccount.create({
-      data: { dealerUserId: dealerUser.id, provider, providerId },
-    })
-    return dealerUser
-  })
+    throw error
+  }
 }
 
 function deriveNameFromEmail(email: string): string {
