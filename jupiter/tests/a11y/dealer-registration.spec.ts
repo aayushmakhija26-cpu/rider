@@ -29,12 +29,14 @@ test.describe('Dealer Registration', () => {
     await page.fill('input[name="email"]', duplicateEmail);
     await page.fill('input[name="dealershipName"]', 'First Dealership');
     await page.fill('input[name="password"]', 'SecurePass123!');
+    await page.fill('input[name="passwordConfirm"]', 'SecurePass123!');
     await page.click('button[type="submit"]');
 
     // Wait for redirect
     await expect(page).toHaveURL(/\/dealer\/onboarding/);
 
-    // Navigate back to signup to test duplicate
+    // Clear session and navigate back to signup to test duplicate
+    await page.context().clearCookies();
     await page.goto('/sign-up');
 
     // Try to register with same email
