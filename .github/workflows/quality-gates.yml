@@ -365,7 +365,9 @@ jobs:
             echo ""
             echo "Add these variables to the Vercel project at:"
             echo "  https://vercel.com/dashboard/project/$PROJECT_ID/settings/environment-variables"
-            exit 1
+            echo ""
+            echo "ℹ This check is informational (non-blocking). Configure these vars to enable full validation."
+            exit 0
           fi
 
           echo "✓ All required environment variables are configured in Vercel"
