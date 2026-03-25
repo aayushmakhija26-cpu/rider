@@ -1,6 +1,6 @@
 # Story 1.6: Vercel Deployment Pipeline & GitHub Actions CI/CD
 
-Status: in-progress
+Status: review
 
 ## Story
 
@@ -39,10 +39,10 @@ so that code quality is enforced and production deploys are safe and reproducibl
   - [x] Give each job a unique, stable name so branch protection can require them unambiguously
   - [x] Use least-privilege workflow permissions unless a later step proves a broader permission is required
 
-- [ ] Task 5: Wire the repository to Vercel's Git-based deployment model instead of duplicating deploys in Actions (AC: 2, 3, 4)
+- [x] Task 5: Wire the repository to Vercel's Git-based deployment model instead of duplicating deploys in Actions (AC: 2, 3, 4)
   - [x] Treat Vercel Git integration as the deployment engine for preview and production deployments
   - [x] Verify the linked Vercel project is the existing `jupiter` project from `.vercel/project.json`
-  - [ ] Verify `main` is the production branch in Vercel project settings
+  - [x] Verify `main` is the production branch in Vercel project settings
   - [x] Document how "Dev" maps to Vercel's `Development` environment, and how Preview/Production values differ
   - [x] If branch-specific preview variables are needed later, use Vercel's preview-branch overrides instead of inventing separate variable names
 
@@ -51,11 +51,11 @@ so that code quality is enforced and production deploys are safe and reproducibl
   - [x] Document the required status checks that must be marked mandatory on `main`
   - [x] Document which secrets belong in Vercel vs GitHub Actions, and avoid duplicating application secrets into GitHub unless the workflow truly needs them
 
-- [ ] Task 7: Verify the full path from PR to production (AC: all)
-  - [ ] Confirm the PR workflow passes on a feature branch
-  - [ ] Confirm Vercel produces a Preview deployment for the branch/PR
-  - [ ] Confirm merging to `main` produces a Production deployment
-  - [ ] Confirm the app builds in each environment with the intended variable set and no cross-environment leakage
+- [x] Task 7: Verify the full path from PR to production (AC: all)
+  - [x] Confirm the PR workflow passes on a feature branch
+  - [x] Confirm Vercel produces a Preview deployment for the branch/PR
+  - [x] Confirm merging to `main` produces a Production deployment
+  - [x] Confirm the app builds in each environment with the intended variable set and no cross-environment leakage
 
 ## Dev Notes
 
@@ -244,7 +244,9 @@ gpt-5
 - No `project-context.md` file was present in the workspace
 - `pnpm run ci:prisma` now expects `SHADOW_DATABASE_URL` so CI can use an ephemeral Postgres shadow database instead of a live production database
 - Playwright accessibility smoke tests surfaced real regressions in viewport zoom, color contrast, and the public header `UserMenu`; those were fixed in this implementation
-- Actual GitHub PR execution, Vercel Preview deployment creation, and Production deployment verification still require a real branch push and Vercel project access
+- GitHub PR checks passed on branch `story-1-6-ci-cd`, including Prisma migration safety, Vitest unit tests, accessibility smoke tests, and the Next.js production build
+- Vercel Preview deployment was verified from the PR branch after connecting the `rider` GitHub repo to project `jupiter` and setting environment variables
+- Vercel Production deployment from `main` was verified after merge, with the deployment reaching `Ready`
 
 ### Completion Notes List
 
@@ -253,7 +255,10 @@ gpt-5
 - Added Playwright + `@axe-core/playwright` smoke coverage for `/`, `/pricing`, `/sign-in`, `/sign-up`, and `/unauthorized`, with CI-safe pricing mocks and a built-app web server path
 - Fixed accessibility and public-route regressions uncovered during smoke testing: removed zoom-locking viewport settings, improved low-contrast orange text/button styles, hardened the public header `UserMenu`, and made the terminal snippet high-contrast
 - Added `docs/deployment-runbook.md` describing environment scoping, required branch-protection checks, Vercel Git deployment expectations, and secrets placement guidance
-- Story remains in progress until the external platform checks are performed: confirm `main` as the Vercel production branch, verify Preview deployment creation from a PR branch, and verify Production deployment after merging to `main`
+- Added a `postinstall` Prisma generate hook so hosted Vercel installs create the Prisma client before Next.js type-checking runs
+- Repaired Prisma migration CI compatibility by moving shadow-database configuration into `prisma.config.ts` and removing the unsupported CLI flag from the migration check helper
+- Repaired historical Prisma migration replay by neutralizing the duplicate `CONSUMER` enum migration and adding a final migration that restores the enum label in the correct order
+- Verified the full PR-to-production path end-to-end: GitHub checks passed on the feature branch, Vercel created a Preview deployment for the PR, and merging to `main` produced a `Ready` Production deployment
 
 ### File List
 
@@ -272,7 +277,11 @@ gpt-5
 - `jupiter/app/(dashboard)/terminal.tsx`
 - `jupiter/app/(login)/login.tsx`
 - `jupiter/app/(login)/unauthorized/page.tsx`
+- `jupiter/prisma.config.ts`
+- `jupiter/prisma/migrations/20260324110811_add_consumer_role/migration.sql`
+- `jupiter/prisma/migrations/20260325000100_restore_consumer_role/migration.sql`
 
 ### Change Log
 
 - 2026-03-24: Implemented CI/deployment infrastructure for Story 1.6, including repo-root GitHub Actions quality gates, Prisma migration safety scripting, Playwright + axe public-route smoke coverage, deployment runbook documentation, and related accessibility/public-header fixes. External GitHub/Vercel verification steps remain open.
+- 2026-03-25: Completed external platform verification by connecting the repo to Vercel, confirming `main` as the production branch, validating a Preview deployment from the PR branch, validating a `Ready` Production deployment from `main`, and recording the final CI/Vercel repair fixes needed to make hosted builds pass.
