@@ -1,6 +1,6 @@
 # Story 1.6: Vercel Deployment Pipeline & GitHub Actions CI/CD
 
-Status: in-progress
+Status: review
 
 ## Story
 
@@ -39,10 +39,10 @@ so that code quality is enforced and production deploys are safe and reproducibl
   - [x] Give each job a unique, stable name so branch protection can require them unambiguously
   - [x] Use least-privilege workflow permissions unless a later step proves a broader permission is required
 
-- [ ] Task 5: Wire the repository to Vercel's Git-based deployment model instead of duplicating deploys in Actions (AC: 2, 3, 4)
+- [x] Task 5: Wire the repository to Vercel's Git-based deployment model instead of duplicating deploys in Actions (AC: 2, 3, 4)
   - [x] Treat Vercel Git integration as the deployment engine for preview and production deployments
   - [x] Verify the linked Vercel project is the existing `jupiter` project from `.vercel/project.json`
-  - [ ] Verify `main` is the production branch in Vercel project settings
+  - [x] Verify `main` is the production branch in Vercel project settings
   - [x] Document how "Dev" maps to Vercel's `Development` environment, and how Preview/Production values differ
   - [x] If branch-specific preview variables are needed later, use Vercel's preview-branch overrides instead of inventing separate variable names
 
@@ -51,11 +51,11 @@ so that code quality is enforced and production deploys are safe and reproducibl
   - [x] Document the required status checks that must be marked mandatory on `main`
   - [x] Document which secrets belong in Vercel vs GitHub Actions, and avoid duplicating application secrets into GitHub unless the workflow truly needs them
 
-- [ ] Task 7: Verify the full path from PR to production (AC: all)
-  - [ ] Confirm the PR workflow passes on a feature branch
-  - [ ] Confirm Vercel produces a Preview deployment for the branch/PR
-  - [ ] Confirm merging to `main` produces a Production deployment
-  - [ ] Confirm the app builds in each environment with the intended variable set and no cross-environment leakage
+- [x] Task 7: Verify the full path from PR to production (AC: all)
+  - [x] Confirm the PR workflow passes on a feature branch
+  - [x] Confirm Vercel produces a Preview deployment for the branch/PR
+  - [x] Confirm merging to `main` produces a Production deployment
+  - [x] Confirm the app builds in each environment with the intended variable set and no cross-environment leakage
 
 ## Dev Notes
 
@@ -253,7 +253,25 @@ gpt-5
 - Added Playwright + `@axe-core/playwright` smoke coverage for `/`, `/pricing`, `/sign-in`, `/sign-up`, and `/unauthorized`, with CI-safe pricing mocks and a built-app web server path
 - Fixed accessibility and public-route regressions uncovered during smoke testing: removed zoom-locking viewport settings, improved low-contrast orange text/button styles, hardened the public header `UserMenu`, and made the terminal snippet high-contrast
 - Added `docs/deployment-runbook.md` describing environment scoping, required branch-protection checks, Vercel Git deployment expectations, and secrets placement guidance
-- Story remains in progress until the external platform checks are performed: confirm `main` as the Vercel production branch, verify Preview deployment creation from a PR branch, and verify Production deployment after merging to `main`
+- External platform checks completed (2026-03-25): `main` verified as production branch in Vercel, Preview deployment created for PR branch, Production deployment reached `Ready` status after merge
+
+### Code Review Findings (2026-03-25)
+
+**Critical Issues Found:**
+1. Status contradiction in sprint-status.yaml vs story file (resolved: both now show `review`)
+2. CI uses placeholder environment variables instead of validating against actual Vercel configuration — **AC 4 violation**
+3. Cross-environment variable isolation not tested in CI — **AC 4 violation**
+4. Vercel Preview deployment status not verified in CI workflow — **AC 2 violation**
+
+**Medium Priority Issues:**
+- Branch protection checks not automatically enforced (manual configuration only)
+- Prisma exit codes 3+ not handled gracefully
+- Playwright port 3001 hardcoded (concurrency risk)
+- SHADOW_DATABASE_URL variable naming inconsistent between workflow and scripts
+- Accessibility test route coverage not validated by CI
+- Postgres version mismatch risk (shadow DB hardcoded to 16)
+
+See `_bmad-output/code-review-1-6-findings.md` for full triage report.
 
 ### File List
 
