@@ -1,0 +1,3 @@
+-- CONSUMER was already present in the initial Role enum created by
+-- 20260324054038_init_core_schema. Keep this migration as a no-op so the
+-- migration history can replay cleanly on a fresh shadow database.

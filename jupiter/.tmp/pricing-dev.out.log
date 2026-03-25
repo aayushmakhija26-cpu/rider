@@ -1,0 +1,100 @@
+
+> @ dev:ci C:\Users\Aayush Makhija\Aayush\Rider\jupiter
+> next dev --hostname 127.0.0.1 --port 3001
+
+   ▲ Next.js 15.6.0-canary.59 (Turbopack)
+   - Local:        http://127.0.0.1:3001
+   - Network:      http://127.0.0.1:3001
+   - Environments: .env.local, .env
+   - Experiments (use with caution):
+     ✓ ppr
+     ✓ rdcForNavigations (enabled by `experimental.ppr`)
+
+ ✓ Starting...
+Creating turbopack project {
+  dir: 'C:\\Users\\Aayush Makhija\\Aayush\\Rider\\jupiter',
+  testMode: true
+}
+ ✓ Compiled middleware in 209ms
+ ✓ Ready in 1342ms
+ ○ Compiling /pricing ...
+ ✓ Compiled /pricing in 2.8s
+ GET /pricing 200 in 3287ms
+ ✓ Compiled in 210ms
+ ✓ Compiled / in 475ms
+ GET / 200 in 827ms
+ GET / 200 in 120ms
+ ○ Compiling /sign-in ...
+ ✓ Compiled /sign-in in 836ms
+ GET / 200 in 1759ms
+ GET /sign-in 200 in 1554ms
+ GET /sign-up 200 in 1559ms
+ GET /pricing 200 in 1563ms
+ ○ Compiling /api/user ...
+ ✓ Compiled /api/user in 1079ms
+ GET /api/user 401 in 1615ms
+ GET /api/user 200 in 1313ms
+ ○ Compiling /unauthorized ...
+ ✓ Compiled /unauthorized in 2s
+ GET /unauthorized 200 in 3237ms
+ GET / 200 in 303ms
+ GET / 200 in 94ms
+ GET /sign-up 200 in 1112ms
+ GET /sign-in 200 in 1176ms
+ GET /pricing 200 in 2026ms
+ GET / 200 in 2573ms
+ GET /api/user 401 in 29ms
+ GET /api/user 401 in 20ms
+ GET /unauthorized 200 in 1939ms
+ GET / 200 in 118ms
+ GET / 200 in 96ms
+ GET / 200 in 358ms
+ GET /api/user 401 in 12ms
+ GET /pricing 200 in 263ms
+ GET /api/user 401 in 18ms
+ GET /sign-in 200 in 480ms
+ GET /sign-up 200 in 153ms
+ GET /unauthorized 200 in 133ms
+ GET / 200 in 396ms
+ GET / 200 in 91ms
+ GET / 200 in 288ms
+ GET /api/user 401 in 12ms
+ GET /pricing 200 in 679ms
+ GET /api/user 401 in 20ms
+ GET /sign-in 200 in 142ms
+ GET /sign-up 200 in 102ms
+ GET /unauthorized 200 in 104ms
+ ✓ Compiled in 519ms
+   ▲ Next.js 15.6.0-canary.59 (Turbopack)
+   - Local:        http://127.0.0.1:3001
+   - Network:      http://127.0.0.1:3001
+   - Environments: .env.local, .env
+   - Experiments (use with caution):
+     ✓ ppr
+     ✓ rdcForNavigations (enabled by `experimental.ppr`)
+
+ ✓ Starting...
+Creating turbopack project {
+  dir: 'C:\\Users\\Aayush Makhija\\Aayush\\Rider\\jupiter',
+  testMode: true
+}
+ ○ Compiling middleware ...
+ ✓ Compiled middleware in 603ms
+ ✓ Ready in 6.2s
+   Reload env: .env.local
+ ✓ Compiled in 195ms
+   ▲ Next.js 15.6.0-canary.59 (Turbopack)
+   - Local:        http://127.0.0.1:3001
+   - Network:      http://127.0.0.1:3001
+   - Environments: .env.local, .env
+   - Experiments (use with caution):
+     ✓ ppr
+     ✓ rdcForNavigations (enabled by `experimental.ppr`)
+
+ ✓ Starting...
+Creating turbopack project {
+  dir: 'C:\\Users\\Aayush Makhija\\Aayush\\Rider\\jupiter',
+  testMode: true
+}
+ ✓ Compiled middleware in 471ms
+ ✓ Ready in 2.4s

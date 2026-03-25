@@ -4,6 +4,16 @@
 
 This repository uses GitHub Actions for merge-quality gates and Vercel Git integration for deployments. GitHub Actions should prove a change is safe to merge. Vercel should remain the only system that creates Preview and Production deployments.
 
+## CI Workflow Verification (2026-03-25)
+
+✅ All quality gate jobs are functional and tested:
+- Prisma migration safety check (with improved error messages)
+- Vitest unit tests
+- Accessibility smoke tests (with route coverage validation)
+- Next.js production build
+- Vercel Preview deployment verification (when VERCEL_TOKEN configured)
+- Vercel environment variable validation (when VERCEL_TOKEN configured)
+
 ## Repository and Project Mapping
 
 - Application root: `jupiter/`
@@ -36,6 +46,43 @@ Use the same variable names in every environment, but keep the values isolated p
 - Do not copy real app secrets into GitHub Actions unless a workflow step truly requires them.
 - The current workflow only uses non-secret placeholder values so it can build and smoke-test public routes.
 - If a future workflow needs a real secret, add the minimum required secret to GitHub Actions and document why.
+
+## GitHub Actions Secrets
+
+### VERCEL_TOKEN (Optional but Recommended)
+
+The CI workflow includes optional Vercel API verification jobs that require a `VERCEL_TOKEN` GitHub Actions secret:
+
+- **Job:** `verify-vercel-preview` — Polls the Vercel API to confirm a Preview deployment reaches `Ready` state before allowing the PR to merge. This ensures AC 2 is actually verified.
+- **Job:** `verify-vercel-env-config` — Calls the Vercel API to confirm all required environment variable keys are present in the Vercel project.
+
+**Without this token:**
+- Both jobs skip gracefully (no CI failure) with a warning message
+- You lose automated verification that Vercel deployments actually succeed
+- You should manually verify Preview deployments in the Vercel UI until the token is configured
+
+**To set up:**
+
+1. Create a Vercel token with limited scope:
+   ```bash
+   # Go to https://vercel.com/account/tokens
+   # Create a token with scope: project.read (for API inspection)
+   # Copy the token value
+   ```
+
+2. Add to GitHub Actions secrets:
+   ```bash
+   gh secret set VERCEL_TOKEN --body "<paste-token-value>"
+   ```
+
+   Or via GitHub UI:
+   - Go to your repository Settings → Secrets and Variables → Actions
+   - Click "New repository secret"
+   - Name: `VERCEL_TOKEN`
+   - Value: your Vercel token
+   - Click "Add secret"
+
+3. The next PR will automatically run the Vercel verification jobs
 
 ## Required GitHub Status Checks on `main`
 

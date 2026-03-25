@@ -1,0 +1,105 @@
+// prisma/schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ── Enums ──────────────────────────────────────────────────────────────────
+
+enum Role {
+  DEALER_ADMIN
+  DEALER_STAFF
+  CONSUMER
+  SYSADMIN
+}
+
+// ── Models ─────────────────────────────────────────────────────────────────
+
+model Dealer {
+  id               String       @id @default(cuid())
+  name             String
+  email            String       @unique
+  // Branding (Story 2.3)
+  logoUrl          String?      @map("logo_url")
+  primaryColour    String?      @map("primary_colour")
+  secondaryColour  String?      @map("secondary_colour")
+  contactPhone     String?      @map("contact_phone")
+  contactEmail     String?      @map("contact_email")
+  websiteUrl       String?      @map("website_url")
+  // Billing (Story 2.6)
+  stripeCustomerId     String?  @unique @map("stripe_customer_id")
+  // @unique enforces one active subscription per dealer at a time.
+  // Product rule: always cancel the existing subscription before creating a new one.
+  // Stripe webhooks guarantee `customer.subscription.deleted` fires before
+  // `customer.subscription.created`, so nulling this field on delete is safe.
+  stripeSubscriptionId String?  @unique @map("stripe_subscription_id")
+  stripeProductId      String?  @map("stripe_product_id")
+  planName             String?  @map("plan_name")
+  subscriptionStatus   String?  @map("subscription_status")
+  // DMS Integration (Story 3.x)
+  simulationMode   Boolean      @default(false) @map("simulation_mode")
+  // Timestamps
+  createdAt        DateTime     @default(now()) @map("created_at")
+  updatedAt        DateTime     @updatedAt @map("updated_at")
+
+  // Relations
+  dealerUsers      DealerUser[]
+  consumers        Consumer[]
+
+  @@map("dealers")
+}
+
+model DealerUser {
+  id              String   @id @default(cuid())
+  dealerId        String   @map("dealer_id")
+  email           String
+  passwordHash    String?  @map("password_hash")
+  name            String?
+  role            Role     @default(DEALER_STAFF)
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  dealer          Dealer        @relation(fields: [dealerId], references: [id], onDelete: Cascade)
+  oauthAccounts   OAuthAccount[]
+
+  @@unique([dealerId, email])
+  @@index([dealerId], name: "dealer_users_dealer_id_idx")
+  @@map("dealer_users")
+}
+
+model OAuthAccount {
+  id           String     @id @default(cuid())
+  dealerUserId String     @map("dealer_user_id")
+  provider     String
+  providerId   String     @map("provider_id")
+  createdAt    DateTime   @default(now()) @map("created_at")
+
+  // Relations
+  dealerUser   DealerUser @relation(fields: [dealerUserId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerId])
+  @@index([dealerUserId], name: "oauth_accounts_dealer_user_id_idx")
+  @@map("oauth_accounts")
+}
+
+model Consumer {
+  id          String   @id @default(cuid())
+  dealerId    String   @map("dealer_id")
+  email       String
+  name        String?
+  // Opt-out / consent (Story 6.4, 8.x)
+  emailOptOut Boolean  @default(false) @map("email_opt_out")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  dealer      Dealer   @relation(fields: [dealerId], references: [id], onDelete: Cascade)
+
+  @@unique([dealerId, email])
+  @@index([dealerId], name: "consumers_dealer_id_idx")
+  @@map("consumers")
+}
