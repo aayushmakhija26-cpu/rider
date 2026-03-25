@@ -100,7 +100,8 @@ jobs:
           MISSING_ROUTES=()
 
           for route in "${REQUIRED_ROUTES[@]}"; do
-            if ! grep -qF "\"$route\"" "$SPEC"; then
+            # Check for the route as either single or double quoted string
+            if ! grep -qE "(['\"])$route\1" "$SPEC"; then
               MISSING_ROUTES+=("$route")
             fi
           done
