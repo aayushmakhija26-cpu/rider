@@ -4,6 +4,16 @@
 
 This repository uses GitHub Actions for merge-quality gates and Vercel Git integration for deployments. GitHub Actions should prove a change is safe to merge. Vercel should remain the only system that creates Preview and Production deployments.
 
+## CI Workflow Verification (2026-03-25)
+
+✅ All quality gate jobs are functional and tested:
+- Prisma migration safety check (with improved error messages)
+- Vitest unit tests
+- Accessibility smoke tests (with route coverage validation)
+- Next.js production build
+- Vercel Preview deployment verification (when VERCEL_TOKEN configured)
+- Vercel environment variable validation (when VERCEL_TOKEN configured)
+
 ## Repository and Project Mapping
 
 - Application root: `jupiter/`
