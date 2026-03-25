@@ -217,8 +217,8 @@ jobs:
       - name: Extract Vercel project info
         id: vercel
         run: |
-          PROJECT_ID=$(jq -r '.projectId' .vercel/project.json)
-          ORG_ID=$(jq -r '.orgId' .vercel/project.json)
+          PROJECT_ID=$(cat .vercel/project.json | grep -o '"projectId":"[^"]*"' | cut -d'"' -f4)
+          ORG_ID=$(cat .vercel/project.json | grep -o '"orgId":"[^"]*"' | cut -d'"' -f4)
           echo "projectId=$PROJECT_ID" >> $GITHUB_OUTPUT
           echo "orgId=$ORG_ID" >> $GITHUB_OUTPUT
           echo "branch=${{ github.head_ref }}" >> $GITHUB_OUTPUT
@@ -302,8 +302,8 @@ jobs:
       - name: Extract Vercel project info
         id: vercel
         run: |
-          PROJECT_ID=$(jq -r '.projectId' .vercel/project.json)
-          ORG_ID=$(jq -r '.orgId' .vercel/project.json)
+          PROJECT_ID=$(cat .vercel/project.json | grep -o '"projectId":"[^"]*"' | cut -d'"' -f4)
+          ORG_ID=$(cat .vercel/project.json | grep -o '"orgId":"[^"]*"' | cut -d'"' -f4)
           echo "projectId=$PROJECT_ID" >> $GITHUB_OUTPUT
           echo "orgId=$ORG_ID" >> $GITHUB_OUTPUT
 
