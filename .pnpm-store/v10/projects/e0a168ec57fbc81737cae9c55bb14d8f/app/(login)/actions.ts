@@ -14,6 +14,7 @@ import {
   setSession,
 } from '@/lib/auth/session';
 import { prisma } from '@/src/lib/db';
+import { getActiveUserForPasswordSignIn } from '@/src/services/dealerStaff.service';
 
 // Helper: derive a dealer name from an email domain
 // e.g. "admin@honda.com" → "Honda Auto"
@@ -34,9 +35,7 @@ const signInSchema = z.object({
 });
 
 export const signIn = validatedAction(signInSchema, async (data, _formData) => {
-  const dealerUser = await prisma.dealerUser.findFirst({
-    where: { email: data.email },
-  });
+  const dealerUser = await getActiveUserForPasswordSignIn(data.email);
 
   if (!dealerUser || !dealerUser.passwordHash) {
     return { error: 'Invalid credentials' };
@@ -58,6 +57,8 @@ const signUpSchema = z.object({
 });
 
 export const signUp = validatedAction(signUpSchema, async (data, _formData) => {
+  const normalisedEmail = data.email.trim().toLowerCase();
+
   // Compute hash before opening the transaction — bcrypt is CPU-bound (~100ms)
   // and holding a DB connection open for it risks pool exhaustion under load.
   const passwordHash = await hashPassword(data.password);
@@ -67,14 +68,14 @@ export const signUp = validatedAction(signUpSchema, async (data, _formData) => {
     dealerUser = await prisma.$transaction(async (tx) => {
       const dealer = await tx.dealer.create({
         data: {
-          name: deriveNameFromEmail(data.email),
-          email: data.email,
+          name: deriveNameFromEmail(normalisedEmail),
+          email: normalisedEmail,
         },
       });
       return tx.dealerUser.create({
         data: {
           dealerId: dealer.id,
-          email: data.email,
+          email: normalisedEmail,
           passwordHash,
           role: 'DEALER_ADMIN',
         },

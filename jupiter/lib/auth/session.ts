@@ -2,6 +2,7 @@ import { compare, hash } from 'bcryptjs';
 import { SignJWT, jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
 import type { DealerUser, Role } from '@prisma/client';
+import { prisma } from '@/src/lib/db';
 
 const SALT_ROUNDS = 10;
 
@@ -54,11 +55,97 @@ export async function verifyToken(input: string) {
   return payload as SessionData;
 }
 
-export async function getSession(): Promise<SessionData | null> {
-  const session = (await cookies()).get('session')?.value;
-  if (!session) return null;
+export async function createSessionCookie(
+  user: Pick<DealerUser, 'id' | 'role' | 'dealerId'>
+) {
+  if (!user.dealerId) {
+    throw new Error('Cannot create session: dealerId is required');
+  }
+
+  const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+  const session: SessionData = {
+    userId: user.id,
+    role: user.role,
+    dealerId: user.dealerId,
+    expires: expiresAt.toISOString(),
+  };
+
+  return {
+    expiresAt,
+    token: await signToken(session),
+  };
+}
+
+async function validateSessionData(
+  session: SessionData
+): Promise<SessionData | null> {
   try {
-    return await verifyToken(session);
+    const dealerUser = await prisma.dealerUser.findUnique({
+      where: { id: session.userId },
+      select: {
+        id: true,
+        dealerId: true,
+        role: true,
+        acceptedAt: true,
+        deactivatedAt: true,
+        inviteExpiresAt: true,
+      },
+    }) as {
+      id: string;
+      dealerId: string;
+      role: Role;
+      acceptedAt: Date | null;
+      deactivatedAt: Date | null;
+      inviteExpiresAt: Date | null;
+    } | null;
+
+    if (!dealerUser) {
+      return null;
+    }
+
+    // Check dealerId matches
+    if (dealerUser.dealerId !== session.dealerId) {
+      return null;
+    }
+
+    // Check user is not deactivated (past or present)
+    if (dealerUser.deactivatedAt && dealerUser.deactivatedAt <= new Date()) {
+      return null;
+    }
+
+    // For DEALER_STAFF: must be accepted
+    if (dealerUser.role === 'DEALER_STAFF' && dealerUser.acceptedAt === null) {
+      return null;
+    }
+
+    // For DEALER_STAFF: invite must not be expired
+    if (
+      dealerUser.role === 'DEALER_STAFF' &&
+      dealerUser.inviteExpiresAt &&
+      dealerUser.inviteExpiresAt <= new Date()
+    ) {
+      return null;
+    }
+
+    return {
+      ...session,
+      dealerId: dealerUser.dealerId,
+      role: dealerUser.role,
+      userId: dealerUser.id,
+    };
+  } catch (error) {
+    // Log database errors but don't expose them to the client
+    console.error('[auth] validateSessionData failed:', error);
+    return null;
+  }
+}
+
+export async function validateSessionCookieValue(
+  cookieValue: string
+): Promise<SessionData | null> {
+  try {
+    const session = await verifyToken(cookieValue);
+    return await validateSessionData(session);
   } catch {
     return null;
   }
@@ -70,6 +157,12 @@ export class AuthError extends Error {
     super(message ?? code);
     this.code = code;
   }
+}
+
+export async function getSession(): Promise<SessionData | null> {
+  const sessionCookie = (await cookies()).get('session')?.value;
+  if (!sessionCookie) return null;
+  return validateSessionCookieValue(sessionCookie);
 }
 
 /**
@@ -87,19 +180,17 @@ export async function requireAuth(allowedRoles: Role[]): Promise<SessionData> {
 }
 
 export async function setSession(user: DealerUser) {
-  const expiresInOneDay = new Date(Date.now() + 24 * 60 * 60 * 1000);
-  const session: SessionData = {
-    userId: user.id,
-    role: user.role,
-    dealerId: user.dealerId,
-    expires: expiresInOneDay.toISOString(),
-  };
-  const encryptedSession = await signToken(session);
-  (await cookies()).set('session', encryptedSession, {
-    expires: expiresInOneDay,
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    path: '/',
-  });
+  const { expiresAt, token } = await createSessionCookie(user);
+  try {
+    (await cookies()).set('session', token, {
+      expires: expiresAt,
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+    });
+  } catch (error) {
+    console.error('[auth] Failed to set session cookie:', error);
+    throw new Error('Failed to establish session. Please try again.');
+  }
 }

@@ -1,6 +1,10 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { signToken, verifyToken, type SessionData } from '@/lib/auth/session';
+import {
+  signToken,
+  validateSessionCookieValue,
+  type SessionData,
+} from '@/lib/auth/session';
 import type { Role } from '@prisma/client';
 import { ROUTE_RULES, getRoleHome } from '@/lib/auth/route-rules';
 
@@ -19,9 +23,7 @@ export async function middleware(request: NextRequest) {
   const sessionCookie = request.cookies.get('session');
   let parsed: SessionData | null = null;
   if (sessionCookie) {
-    try {
-      parsed = await verifyToken(sessionCookie.value);
-    } catch { /* invalid/expired */ }
+    parsed = await validateSessionCookieValue(sessionCookie.value);
   }
 
   // Unauthenticated-only routes: redirect logged-in users to their home
@@ -29,7 +31,12 @@ export async function middleware(request: NextRequest) {
     if (parsed) {
       return NextResponse.redirect(new URL(getRoleHome(parsed.role), request.url));
     }
-    return NextResponse.next();
+    // If there's a session cookie but validation failed, delete the stale cookie
+    const response = NextResponse.next();
+    if (sessionCookie && !parsed) {
+      response.cookies.delete('session');
+    }
+    return response;
   }
 
   // Protected route: must be authenticated

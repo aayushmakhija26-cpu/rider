@@ -15,6 +15,16 @@ vi.mock('next/headers', () => ({
   cookies: vi.fn(() => mockCookiesStore),
 }))
 
+// Mock prisma — session.ts calls dealerUser.findUnique for DB-backed session validation
+vi.mock('@/src/lib/db', () => ({
+  prisma: {
+    dealerUser: {
+      findUnique: vi.fn(),
+    },
+  },
+}))
+
+import { prisma } from '@/src/lib/db'
 import { hashPassword, comparePasswords, signToken, verifyToken, requireAuth, AuthError } from './session'
 
 describe('password hashing', () => {
@@ -61,6 +71,7 @@ describe('requireAuth', () => {
 
   beforeEach(() => {
     mockCookiesStore.get.mockReturnValue(undefined)
+    vi.mocked(prisma.dealerUser.findUnique).mockResolvedValue(null)
   })
 
   it('throws AuthError UNAUTHORIZED when no session cookie', async () => {
@@ -72,6 +83,10 @@ describe('requireAuth', () => {
   it('throws AuthError FORBIDDEN when role not in allowedRoles', async () => {
     const token = await makeSession('DEALER_STAFF' as Role)
     mockCookiesStore.get.mockReturnValue({ name: 'session', value: token })
+    vi.mocked(prisma.dealerUser.findUnique).mockResolvedValueOnce({
+      id: 'user1', dealerId: 'dealer1', role: 'DEALER_STAFF' as Role,
+      acceptedAt: new Date(), deactivatedAt: null,
+    } as any)
 
     const error = await requireAuth(['DEALER_ADMIN']).catch(e => e)
     expect(error).toBeInstanceOf(AuthError)
@@ -81,6 +96,10 @@ describe('requireAuth', () => {
   it('returns SessionData when role is in allowedRoles', async () => {
     const token = await makeSession('DEALER_ADMIN' as Role)
     mockCookiesStore.get.mockReturnValue({ name: 'session', value: token })
+    vi.mocked(prisma.dealerUser.findUnique).mockResolvedValueOnce({
+      id: 'user1', dealerId: 'dealer1', role: 'DEALER_ADMIN' as Role,
+      acceptedAt: new Date(), deactivatedAt: null,
+    } as any)
 
     const session = await requireAuth(['DEALER_ADMIN', 'DEALER_STAFF'])
     expect(session.userId).toBe('user1')
@@ -90,6 +109,10 @@ describe('requireAuth', () => {
   it('allows CONSUMER role when included in allowedRoles', async () => {
     const token = await makeSession('CONSUMER' as Role)
     mockCookiesStore.get.mockReturnValue({ name: 'session', value: token })
+    vi.mocked(prisma.dealerUser.findUnique).mockResolvedValueOnce({
+      id: 'user1', dealerId: 'dealer1', role: 'CONSUMER' as Role,
+      acceptedAt: new Date(), deactivatedAt: null,
+    } as any)
 
     const session = await requireAuth(['DEALER_ADMIN', 'DEALER_STAFF', 'CONSUMER'] as Role[])
     expect(session.role).toBe('CONSUMER')
@@ -98,6 +121,10 @@ describe('requireAuth', () => {
   it('throws FORBIDDEN when CONSUMER tries DEALER_ADMIN-only route', async () => {
     const token = await makeSession('CONSUMER' as Role)
     mockCookiesStore.get.mockReturnValue({ name: 'session', value: token })
+    vi.mocked(prisma.dealerUser.findUnique).mockResolvedValueOnce({
+      id: 'user1', dealerId: 'dealer1', role: 'CONSUMER' as Role,
+      acceptedAt: new Date(), deactivatedAt: null,
+    } as any)
 
     const error = await requireAuth(['DEALER_ADMIN']).catch(e => e)
     expect(error).toBeInstanceOf(AuthError)
@@ -107,6 +134,10 @@ describe('requireAuth', () => {
   it('allows SYSADMIN role when included in allowedRoles', async () => {
     const token = await makeSession('SYSADMIN' as Role)
     mockCookiesStore.get.mockReturnValue({ name: 'session', value: token })
+    vi.mocked(prisma.dealerUser.findUnique).mockResolvedValueOnce({
+      id: 'user1', dealerId: 'dealer1', role: 'SYSADMIN' as Role,
+      acceptedAt: new Date(), deactivatedAt: null,
+    } as any)
 
     const session = await requireAuth(['SYSADMIN'] as Role[])
     expect(session.role).toBe('SYSADMIN')

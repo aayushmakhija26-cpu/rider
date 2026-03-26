@@ -59,3 +59,79 @@ Error: ENOENT: no such file or directory, scandir 'C:\Users\Aayush Makhija\Aayus
  ⚠ Found a change in next.config.ts. Restarting the server to apply the changes...
 [baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
  ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead.
+ ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead.
+ ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead.
+ ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead.
+ ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead.
+ ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead.
+ ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead.
+ ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead.
+ ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead.
+ ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead.
+ ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead.
+ ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead.
+ ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead.
+ ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead.
+ ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead.
+ ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead.
+ ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead.
+ ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead.
+ ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead.
+ ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead.
+ ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead.
+ ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead.
+ ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead.
+ ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead.
+ ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead.
+ ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead.
+ ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead.
+ ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead.
+ ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead.
+ ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead.
+ ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead.
+ ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead.
+ ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead.
+ ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead.
+ ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead.
+ ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead.
+ ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead.
+ ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead.
+ ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead.
+ ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead.
+ ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead.
+[dealers/POST] ErrorEvent {
+  type: 'error',
+  defaultPrevented: false,
+  cancelable: false,
+  timeStamp: 13132063.0543
+}
+[dealers/POST] ErrorEvent {
+  type: 'error',
+  defaultPrevented: false,
+  cancelable: false,
+  timeStamp: 13152280.0808
+}
+[dealers/POST] ErrorEvent {
+  type: 'error',
+  defaultPrevented: false,
+  cancelable: false,
+  timeStamp: 13156009.7945
+}
+[dealers/POST] ErrorEvent {
+  type: 'error',
+  defaultPrevented: false,
+  cancelable: false,
+  timeStamp: 13413860.0254
+}
+[dealers/POST] ErrorEvent {
+  type: 'error',
+  defaultPrevented: false,
+  cancelable: false,
+  timeStamp: 13435832.8233
+}
+[dealers/POST] ErrorEvent {
+  type: 'error',
+  defaultPrevented: false,
+  cancelable: false,
+  timeStamp: 13439741.8661
+}

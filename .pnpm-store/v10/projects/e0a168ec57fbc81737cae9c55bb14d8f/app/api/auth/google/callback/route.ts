@@ -53,7 +53,7 @@ export async function GET(req: NextRequest) {
     const dealerUser = await findOrCreateOAuthUser({ email, name, provider: 'google', providerId: sub })
     await setSession(dealerUser)
 
-    const redirectRes = NextResponse.redirect(new URL('/dashboard', req.url))
+    const redirectRes = NextResponse.redirect(new URL('/dealer/onboarding', req.url))
     redirectRes.cookies.delete('__oauth_state_google')
     return redirectRes
   } catch (err) {

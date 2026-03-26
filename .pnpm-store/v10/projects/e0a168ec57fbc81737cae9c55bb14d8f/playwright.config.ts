@@ -30,12 +30,6 @@ export default defineConfig({
         process.env.AUTH_SECRET ??
         'playwright-test-auth-secret-with-32-plus-characters',
       BASE_URL: process.env.BASE_URL ?? baseURL,
-      DATABASE_URL:
-        process.env.DATABASE_URL ??
-        'postgresql://test:test@127.0.0.1:5432/test?sslmode=disable',
-      DIRECT_URL:
-        process.env.DIRECT_URL ??
-        'postgresql://test:test@127.0.0.1:5432/test?sslmode=disable',
       STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY ?? '',
       STRIPE_WEBHOOK_SECRET:
         process.env.STRIPE_WEBHOOK_SECRET ?? 'whsec_test_mock',

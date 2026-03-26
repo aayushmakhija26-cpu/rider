@@ -128,6 +128,7 @@ describe('findOrCreateOAuthUser', () => {
           },
           dealerUser: { create: vi.fn().mockResolvedValueOnce(newDealerUser) },
           oAuthAccount: { create: vi.fn().mockResolvedValueOnce({}) },
+          onboardingStep: { createMany: vi.fn().mockResolvedValueOnce({ count: 4 }) },
         }
         return fn(tx as unknown as typeof mockPrisma)
       }
@@ -165,6 +166,7 @@ describe('findOrCreateOAuthUser', () => {
             }),
           },
           oAuthAccount: { create: vi.fn().mockResolvedValueOnce({}) },
+          onboardingStep: { createMany: vi.fn().mockResolvedValueOnce({ count: 4 }) },
         }
         return fn(tx as unknown as typeof mockPrisma)
       }
@@ -201,6 +203,7 @@ describe('findOrCreateOAuthUser', () => {
           },
           dealerUser: { create: vi.fn().mockResolvedValueOnce(newUser) },
           oAuthAccount: { create: vi.fn().mockResolvedValueOnce({}) },
+          onboardingStep: { createMany: vi.fn().mockResolvedValueOnce({ count: 4 }) },
         }
         return fn(tx as unknown as typeof mockPrisma)
       }

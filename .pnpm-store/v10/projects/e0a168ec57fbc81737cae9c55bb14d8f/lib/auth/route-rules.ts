@@ -6,10 +6,12 @@ export type RouteAccess = 'public' | 'unauthenticated-only' | Role[];
 // e.g. /dashboard/security/billing must come before /dashboard.
 // When adding new sub-routes, insert ABOVE the parent catch-all.
 export const ROUTE_RULES: Array<{ prefix: string; access: RouteAccess }> = [
+  { prefix: '/accept-invite', access: 'unauthenticated-only' },
   { prefix: '/sign-in', access: 'unauthenticated-only' },
   { prefix: '/sign-up', access: 'unauthenticated-only' },
   { prefix: '/unauthorized', access: 'public' },
   { prefix: '/api/', access: 'public' },
+  { prefix: '/dealer', access: ['DEALER_ADMIN'] },
   // Admin-only sub-route — must remain BEFORE /dashboard catch-all
   { prefix: '/dashboard/security/billing', access: ['DEALER_ADMIN'] },
   // Dealer portal

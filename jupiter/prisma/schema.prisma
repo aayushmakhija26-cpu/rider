@@ -16,6 +16,13 @@ enum Role {
   SYSADMIN
 }
 
+enum OnboardingStatus {
+  pending
+  active
+  complete
+  skipped
+}
+
 // ── Models ─────────────────────────────────────────────────────────────────
 
 model Dealer {
@@ -48,6 +55,7 @@ model Dealer {
   // Relations
   dealerUsers      DealerUser[]
   consumers        Consumer[]
+  onboardingSteps  OnboardingStep[]
 
   @@map("dealers")
 }
@@ -59,6 +67,11 @@ model DealerUser {
   passwordHash    String?  @map("password_hash")
   name            String?
   role            Role     @default(DEALER_STAFF)
+  inviteTokenHash String?  @unique @map("invite_token_hash")
+  inviteExpiresAt DateTime? @map("invite_expires_at")
+  invitedAt       DateTime? @map("invited_at")
+  acceptedAt      DateTime? @map("accepted_at")
+  deactivatedAt   DateTime? @map("deactivated_at")
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
 
@@ -68,6 +81,7 @@ model DealerUser {
 
   @@unique([dealerId, email])
   @@index([dealerId], name: "dealer_users_dealer_id_idx")
+  @@index([dealerId, deactivatedAt], name: "dealer_users_dealer_id_deactivated_at_idx")
   @@map("dealer_users")
 }
 
@@ -102,4 +116,23 @@ model Consumer {
   @@unique([dealerId, email])
   @@index([dealerId], name: "consumers_dealer_id_idx")
   @@map("consumers")
+}
+
+model OnboardingStep {
+  id            String   @id @default(cuid())
+  dealerId      String   @map("dealer_id")
+  stepName      String   // "branding" | "dms" | "staff" | "billing"
+  status        OnboardingStatus @default(pending)
+  data          Json?    // Store step-specific data (e.g., branding colors, staff invites)
+  completedAt   DateTime? @map("completed_at")
+  skippedAt     DateTime? @map("skipped_at")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  dealer        Dealer   @relation(fields: [dealerId], references: [id], onDelete: Cascade)
+
+  @@unique([dealerId, stepName])
+  @@index([dealerId])
+  @@map("onboarding_steps")
 }
