@@ -35,7 +35,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: 2026-03-23
-last_updated: 2026-03-26T11:49
+last_updated: 2026-03-26T16:30
 project: Rider
 project_key: NOKEY
 tracking_system: file-system
@@ -59,8 +59,8 @@ development_status:
   2-2-dealer-onboarding-checklist: done
   2-3-dealership-branding-configuration: done
   2-4-dealer-staff-account-management: done
-  2-5-role-assignment-for-dealer-staff: backlog
-  2-6-stripe-billing-setup: backlog
+  2-5-role-assignment-for-dealer-staff: done
+  2-6-stripe-billing-setup: done
   2-7-dealership-profile-management: backlog
   epic-2-retrospective: optional
 

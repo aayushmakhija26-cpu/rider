@@ -202,6 +202,98 @@ export async function handleSubscriptionChange(
   }
 }
 
+/**
+ * Create a Stripe Checkout session for a dealer. (Story 2.6)
+ * Reuses an existing Stripe Customer if one already exists (retry scenario).
+ */
+export async function createDealerCheckoutSession({
+  dealerId,
+  priceId,
+  existingStripeCustomerId,
+}: {
+  dealerId: string;
+  priceId: string;
+  existingStripeCustomerId?: string | null;
+}): Promise<Stripe.Checkout.Session> {
+  return stripe.checkout.sessions.create({
+    payment_method_types: ['card'],
+    line_items: [{ price: priceId, quantity: 1 }],
+    mode: 'subscription',
+    success_url: `${process.env.BASE_URL}/api/stripe/checkout?session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${process.env.BASE_URL}/onboarding`,
+    customer: existingStripeCustomerId || undefined,
+    client_reference_id: dealerId,
+    allow_promotion_codes: true,
+  });
+}
+
+/**
+ * Create a Stripe Customer Portal session for a dealer. (Story 2.6)
+ * Requires an existing Stripe Customer ID.
+ */
+export async function createDealerPortalSession({
+  stripeCustomerId,
+  returnUrl,
+}: {
+  stripeCustomerId: string;
+  returnUrl: string;
+}): Promise<Stripe.BillingPortal.Session> {
+  let configuration: Stripe.BillingPortal.Configuration;
+
+  // P-13: Filter for an active configuration rather than blindly taking data[0]
+  const configurations = await stripe.billingPortal.configurations.list({ limit: 100 });
+  const activeConfig = configurations.data.find((c) => c.active);
+
+  if (activeConfig) {
+    configuration = activeConfig;
+  } else {
+    // P-3: Build the products array from STRIPE_PRICE_ID — do NOT use products:[]
+    // which Stripe rejects when subscription_update is enabled.
+    const priceId = process.env.STRIPE_PRICE_ID;
+    let subscriptionUpdateFeature: Stripe.BillingPortalConfigurationCreateParams.Features['subscription_update'];
+
+    if (priceId) {
+      const price = await stripe.prices.retrieve(priceId, { expand: ['product'] });
+      const product = price.product as Stripe.Product;
+      if (product.active) {
+        const prices = await stripe.prices.list({ product: product.id, active: true });
+        subscriptionUpdateFeature = {
+          enabled: true,
+          default_allowed_updates: ['price', 'quantity', 'promotion_code'],
+          proration_behavior: 'create_prorations',
+          products: [{ product: product.id, prices: prices.data.map((p) => p.id) }],
+        };
+      } else {
+        subscriptionUpdateFeature = { enabled: false };
+      }
+    } else {
+      subscriptionUpdateFeature = { enabled: false };
+    }
+
+    configuration = await stripe.billingPortal.configurations.create({
+      business_profile: { headline: 'Manage your subscription' },
+      features: {
+        subscription_update: subscriptionUpdateFeature,
+        subscription_cancel: {
+          enabled: true,
+          mode: 'at_period_end',
+          cancellation_reason: {
+            enabled: true,
+            options: ['too_expensive', 'missing_features', 'switched_service', 'unused', 'other'],
+          },
+        },
+        payment_method_update: { enabled: true },
+      },
+    });
+  }
+
+  return stripe.billingPortal.sessions.create({
+    customer: stripeCustomerId,
+    return_url: returnUrl,
+    configuration: configuration.id,
+  });
+}
+
 export async function getStripePrices() {
   if (shouldUseMockStripeCatalog()) {
     return MOCK_STRIPE_PRICES;

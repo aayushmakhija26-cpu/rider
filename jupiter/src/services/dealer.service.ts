@@ -129,6 +129,36 @@ export async function updateBranding(
 }
 
 /**
+ * Find a Dealer by Stripe customer ID. (Story 2.6)
+ * Used by the webhook handler to locate the dealer for a given Stripe customer.
+ */
+export async function getDealerByStripeCustomerId(customerId: string): Promise<Dealer | null> {
+  return prisma.dealer.findUnique({
+    where: { stripeCustomerId: customerId },
+  });
+}
+
+/**
+ * Update billing fields on a Dealer record. (Story 2.6)
+ * Idempotent: calling with the same values produces the same state (plain update).
+ */
+export async function updateDealerStripeSubscription(
+  dealerId: string,
+  data: {
+    stripeCustomerId?: string | null;
+    stripeSubscriptionId?: string | null;
+    stripeProductId?: string | null;
+    planName?: string | null;
+    subscriptionStatus?: string | null;
+  }
+): Promise<Dealer> {
+  return prisma.dealer.update({
+    where: { id: dealerId },
+    data,
+  });
+}
+
+/**
  * Get dealer branding configuration (Story 2.3)
  * Returns only branding-related fields for preview/display
  * Throws error if dealer not found
