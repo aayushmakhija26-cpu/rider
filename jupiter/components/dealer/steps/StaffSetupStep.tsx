@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { toast } from 'sonner';
 import type { DealerStaffSummary } from '@/src/services/dealerStaff.service';
 
 interface StaffSetupStepProps {
@@ -37,6 +38,7 @@ export function StaffSetupStep({ dealerId, status, onUpdate }: StaffSetupStepPro
 
   const [confirmDeactivate, setConfirmDeactivate] = useState<string | null>(null);
   const [isDeactivating, setIsDeactivating] = useState(false);
+  const [changingRoles, setChangingRoles] = useState<Set<string>>(new Set());
 
   const loadStaff = useCallback(async (signal?: AbortSignal) => {
     if (!dealerId) return;
@@ -137,6 +139,45 @@ export function StaffSetupStep({ dealerId, status, onUpdate }: StaffSetupStepPro
     }
   };
 
+  const handleChangeRole = async (staffUserId: string, newRole: 'DEALER_STAFF' | 'DEALER_ADMIN') => {
+    setChangingRoles((prev) => new Set(prev).add(staffUserId));
+    try {
+      const res = await fetch(
+        `/api/dealers/${dealerId}/staff/${staffUserId}/role`,
+        {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ newRole }),
+        }
+      );
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        const code = data.code as string | undefined;
+        const message =
+          code === 'FORBIDDEN' ? 'You do not have permission to change this role.' :
+          code === 'NOT_FOUND' ? 'Staff member not found.' :
+          'Failed to update role. Please try again.';
+        toast.error(message);
+        return;
+      }
+
+      toast.success('Staff role updated.');
+      await loadStaff().catch(() => {
+        // Role was updated; list reload failed — surface a soft warning
+        toast.error('Role updated, but the staff list could not be refreshed. Please reload.');
+      });
+    } catch {
+      toast.error('An unexpected error occurred while updating role.');
+    } finally {
+      setChangingRoles((prev) => {
+        const next = new Set(prev);
+        next.delete(staffUserId);
+        return next;
+      });
+    }
+  };
+
   const activeAndPendingCount = staff.filter((s) => s.status !== 'deactivated').length;
 
   return (
@@ -220,9 +261,21 @@ export function StaffSetupStep({ dealerId, status, onUpdate }: StaffSetupStepPro
                     <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${badge.className}`}>
                       {badge.label}
                     </span>
-                    <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
-                      DEALER_STAFF
-                    </span>
+                    {member.status === 'deactivated' || member.role === 'DEALER_ADMIN' ? (
+                      <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
+                        {member.role}
+                      </span>
+                    ) : (
+                      <select
+                        value={member.role}
+                        onChange={(e) => handleChangeRole(member.id, e.target.value as 'DEALER_STAFF' | 'DEALER_ADMIN')}
+                        disabled={changingRoles.has(member.id)}
+                        className="text-xs font-medium px-2 py-0.5 rounded bg-gray-100 text-gray-700 border border-gray-300 hover:bg-gray-150 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <option value="DEALER_STAFF">DEALER_STAFF</option>
+                        <option value="DEALER_ADMIN">DEALER_ADMIN</option>
+                      </select>
+                    )}
 
                     {member.status !== 'deactivated' && (
                       <>

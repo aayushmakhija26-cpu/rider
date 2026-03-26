@@ -7,6 +7,7 @@ import {
   acceptStaffInvite,
   deactivateStaffAccount,
   getActiveUserForPasswordSignIn,
+  updateStaffRole,
   DealerStaffError,
 } from './dealerStaff.service';
 import { prisma } from '@/src/lib/db';
@@ -612,5 +613,125 @@ describe('getStaffInviteState', () => {
       expect(state.email).toBe('staff@test.com');
       expect(state.dealerName).toBe('Test Dealer');
     }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// updateStaffRole
+// ---------------------------------------------------------------------------
+
+describe('updateStaffRole', () => {
+  beforeEach(() => {
+    vi.resetAllMocks();
+  });
+
+  it('updates staff role from DEALER_STAFF to DEALER_ADMIN', async () => {
+    const admin = makeAdmin();
+    const staff = makeStaffUser({ role: 'DEALER_STAFF' as const });
+    const updated = makeStaffUser({ role: 'DEALER_ADMIN' as const });
+
+    vi.mocked(prisma.dealerUser.findUnique).mockResolvedValueOnce(admin as never);
+    vi.mocked(prisma.dealerUser.findUnique).mockResolvedValueOnce(staff as never);
+    vi.mocked(prisma.dealerUser.update).mockResolvedValueOnce(updated as never);
+
+    const result = await updateStaffRole('dealer-1', 'staff-1', 'DEALER_ADMIN', 'admin-1');
+    expect(result.updated.role).toBe('DEALER_ADMIN');
+    expect(result.previousRole).toBe('DEALER_STAFF');
+    expect(prisma.dealerUser.update).toHaveBeenCalledOnce();
+  });
+
+  it('throws FORBIDDEN when trying to change DEALER_ADMIN role', async () => {
+    const admin = makeAdmin();
+    const otherAdmin = makeAdmin({ id: 'admin-2', role: 'DEALER_ADMIN' as const });
+
+    vi.mocked(prisma.dealerUser.findUnique).mockResolvedValueOnce(admin as never);
+    vi.mocked(prisma.dealerUser.findUnique).mockResolvedValueOnce(otherAdmin as never);
+
+    await expect(
+      updateStaffRole('dealer-1', 'admin-2', 'DEALER_STAFF', 'admin-1')
+    ).rejects.toMatchObject({ code: 'FORBIDDEN' });
+  });
+
+  it('returns unchanged staff if role is already the same', async () => {
+    const admin = makeAdmin();
+    const staff = makeStaffUser({ role: 'DEALER_STAFF' as const });
+
+    vi.mocked(prisma.dealerUser.findUnique).mockResolvedValueOnce(admin as never);
+    vi.mocked(prisma.dealerUser.findUnique).mockResolvedValueOnce(staff as never);
+
+    const result = await updateStaffRole('dealer-1', 'staff-1', 'DEALER_STAFF', 'admin-1');
+    expect(result.updated.role).toBe('DEALER_STAFF');
+    expect(result.previousRole).toBe('DEALER_STAFF');
+    expect(prisma.dealerUser.update).not.toHaveBeenCalled();
+  });
+
+  it('throws FORBIDDEN if actor is not DEALER_ADMIN', async () => {
+    const nonAdmin = makeStaffUser({ role: 'DEALER_STAFF' as const });
+
+    vi.mocked(prisma.dealerUser.findUnique).mockResolvedValueOnce(nonAdmin as never);
+
+    await expect(
+      updateStaffRole('dealer-1', 'staff-1', 'DEALER_ADMIN', 'staff-2')
+    ).rejects.toMatchObject({ code: 'FORBIDDEN' });
+  });
+
+  it('throws NOT_FOUND if staff user does not exist', async () => {
+    const admin = makeAdmin();
+
+    vi.mocked(prisma.dealerUser.findUnique).mockResolvedValueOnce(admin as never);
+    vi.mocked(prisma.dealerUser.findUnique).mockResolvedValueOnce(null);
+
+    await expect(
+      updateStaffRole('dealer-1', 'nonexistent', 'DEALER_ADMIN', 'admin-1')
+    ).rejects.toMatchObject({ code: 'NOT_FOUND' });
+  });
+
+  it('throws FORBIDDEN if staff user is from a different dealer', async () => {
+    const admin = makeAdmin({ dealerId: 'dealer-1' });
+    const foreignStaff = makeStaffUser({ dealerId: 'dealer-2' });
+
+    vi.mocked(prisma.dealerUser.findUnique).mockResolvedValueOnce(admin as never);
+    vi.mocked(prisma.dealerUser.findUnique).mockResolvedValueOnce(foreignStaff as never);
+
+    await expect(
+      updateStaffRole('dealer-1', 'staff-1', 'DEALER_ADMIN', 'admin-1')
+    ).rejects.toMatchObject({ code: 'FORBIDDEN' });
+  });
+
+  it('throws FORBIDDEN if attempting to change a DEALER_ADMIN role', async () => {
+    const admin = makeAdmin();
+    const otherAdmin = makeAdmin({ id: 'admin-2' });
+
+    vi.mocked(prisma.dealerUser.findUnique).mockResolvedValueOnce(admin as never);
+    vi.mocked(prisma.dealerUser.findUnique).mockResolvedValueOnce(otherAdmin as never);
+
+    await expect(
+      updateStaffRole('dealer-1', 'admin-2', 'DEALER_STAFF', 'admin-1')
+    ).rejects.toMatchObject({ code: 'FORBIDDEN' });
+  });
+
+  it('throws FORBIDDEN if actor attempts to change their own role', async () => {
+    const admin = makeAdmin({ id: 'admin-1' });
+
+    vi.mocked(prisma.dealerUser.findUnique).mockResolvedValueOnce(admin as never);
+
+    await expect(
+      updateStaffRole('dealer-1', 'admin-1', 'DEALER_STAFF', 'admin-1')
+    ).rejects.toMatchObject({ code: 'FORBIDDEN' });
+  });
+
+  it('throws FORBIDDEN if staff user is deactivated', async () => {
+    const admin = makeAdmin();
+    const deactivatedStaff = makeStaffUser({
+      role: 'DEALER_STAFF' as const,
+      deactivatedAt: new Date(),
+    });
+
+    vi.mocked(prisma.dealerUser.findUnique).mockResolvedValueOnce(admin as never);
+    vi.mocked(prisma.dealerUser.findUnique).mockResolvedValueOnce(deactivatedStaff as never);
+
+    await expect(
+      updateStaffRole('dealer-1', 'staff-1', 'DEALER_ADMIN', 'admin-1')
+    ).rejects.toMatchObject({ code: 'FORBIDDEN' });
   });
 });

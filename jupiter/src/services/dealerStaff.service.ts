@@ -512,6 +512,69 @@ export async function deactivateStaffAccount(
   });
 }
 
+export async function updateStaffRole(
+  dealerId: string,
+  staffUserId: string,
+  newRole: Role,
+  actorUserId: string
+): Promise<{ updated: DealerUser; previousRole: Role }> {
+  // Guard: actor cannot change their own role
+  if (actorUserId === staffUserId) {
+    throw new DealerStaffError('FORBIDDEN', 'You cannot change your own role');
+  }
+
+  // Verify actor is a DEALER_ADMIN for this dealer
+  await assertInviterCanManageStaff(dealerId, actorUserId);
+
+  // Fetch the staff member to verify they exist and belong to this dealer
+  const staffUser = await prisma.dealerUser.findUnique({
+    where: { id: staffUserId },
+  });
+
+  if (!staffUser) {
+    throw new DealerStaffError('NOT_FOUND', 'Staff account not found');
+  }
+
+  // Verify staff member belongs to same dealer
+  if (staffUser.dealerId !== dealerId) {
+    throw new DealerStaffError(
+      'FORBIDDEN',
+      'You cannot update a staff user from another dealership'
+    );
+  }
+
+  // Do not allow changing DEALER_ADMIN roles via this endpoint
+  if (staffUser.role === 'DEALER_ADMIN') {
+    throw new DealerStaffError(
+      'FORBIDDEN',
+      'Cannot change the role of a dealer admin from this flow'
+    );
+  }
+
+  // Do not allow role changes on deactivated accounts
+  if (staffUser.deactivatedAt) {
+    throw new DealerStaffError(
+      'FORBIDDEN',
+      'Cannot change the role of a deactivated staff member'
+    );
+  }
+
+  const previousRole = staffUser.role;
+
+  // If role is already the same, return without updating
+  if (staffUser.role === newRole) {
+    return { updated: staffUser, previousRole };
+  }
+
+  // Update the role
+  const updated = await prisma.dealerUser.update({
+    where: { id: staffUserId },
+    data: { role: newRole },
+  });
+
+  return { updated, previousRole };
+}
+
 export async function getActiveUserForPasswordSignIn(email: string) {
   const normalisedEmail = normaliseEmail(email);
 
