@@ -5,6 +5,8 @@ import {
   updateBranding,
   getDealerByStripeCustomerId,
   updateDealerStripeSubscription,
+  getDealerProfile,
+  updateDealerProfile,
 } from './dealer.service';
 import { prisma } from '@/src/lib/db';
 
@@ -315,6 +317,124 @@ describe('dealer.service', () => {
       expect(prisma.dealer.findUnique).toHaveBeenCalledWith({
         where: { stripeCustomerId: 'cus_unknown' },
       });
+    });
+  });
+
+  describe('getDealerProfile', () => {
+    const mockDealer = {
+      id: 'dealer-123',
+      name: 'Test Dealership',
+      logoUrl: 'https://example.com/logo.png',
+      primaryColour: '#0066CC',
+      contactPhone: '+1 555-1234',
+      contactEmail: 'support@test.com',
+      websiteUrl: 'https://example.com',
+    };
+
+    it('returns correct profile fields when dealer exists', async () => {
+      vi.mocked(prisma.dealer.findUnique).mockResolvedValueOnce(mockDealer as any);
+
+      const result = await getDealerProfile('dealer-123');
+
+      expect(result).toEqual(mockDealer);
+      expect(prisma.dealer.findUnique).toHaveBeenCalledWith({
+        where: { id: 'dealer-123' },
+        select: {
+          id: true,
+          name: true,
+          logoUrl: true,
+          primaryColour: true,
+          contactPhone: true,
+          contactEmail: true,
+          websiteUrl: true,
+        },
+      });
+    });
+
+    it('throws if dealer not found', async () => {
+      vi.mocked(prisma.dealer.findUnique).mockResolvedValueOnce(null);
+
+      await expect(getDealerProfile('nonexistent')).rejects.toThrow('Dealer not found: nonexistent');
+    });
+  });
+
+  describe('updateDealerProfile', () => {
+    const mockDealer = {
+      id: 'dealer-123',
+      name: 'Test Dealership',
+      email: 'test@test.com',
+      logoUrl: null,
+      primaryColour: null,
+      secondaryColour: null,
+      contactPhone: null,
+      contactEmail: null,
+      websiteUrl: null,
+      stripeCustomerId: null,
+      stripeSubscriptionId: null,
+      stripeProductId: null,
+      planName: null,
+      subscriptionStatus: null,
+      simulationMode: false,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    it('updates fields and returns updated Dealer', async () => {
+      const updated = { ...mockDealer, name: 'New Name', primaryColour: '#0066CC' };
+      vi.mocked(prisma.dealer.findUnique).mockResolvedValueOnce(mockDealer);
+      vi.mocked(prisma.dealer.update).mockResolvedValueOnce(updated);
+
+      const result = await updateDealerProfile('dealer-123', {
+        name: 'New Name',
+        primaryColour: '#0066CC',
+      });
+
+      expect(result.name).toBe('New Name');
+      expect(result.primaryColour).toBe('#0066CC');
+      expect(prisma.dealer.update).toHaveBeenCalledWith({
+        where: { id: 'dealer-123' },
+        data: expect.objectContaining({ name: 'New Name' }),
+      });
+    });
+
+    it('applies getSafeColour() fallback to failing colour', async () => {
+      // #FFFFFF fails WCAG AA against white (contrast ratio = 1:1)
+      const updated = { ...mockDealer, primaryColour: '#2563EB' };
+      vi.mocked(prisma.dealer.findUnique).mockResolvedValueOnce(mockDealer);
+      vi.mocked(prisma.dealer.update).mockResolvedValueOnce(updated);
+
+      await updateDealerProfile('dealer-123', { primaryColour: '#FFFFFF' });
+
+      expect(prisma.dealer.update).toHaveBeenCalledWith({
+        where: { id: 'dealer-123' },
+        data: expect.objectContaining({ primaryColour: '#2563EB' }),
+      });
+    });
+
+    it('calling twice with same data produces same result (idempotent)', async () => {
+      const updated = { ...mockDealer, name: 'Stable Name' };
+      vi.mocked(prisma.dealer.findUnique)
+        .mockResolvedValueOnce(mockDealer)
+        .mockResolvedValueOnce(mockDealer);
+      vi.mocked(prisma.dealer.update)
+        .mockResolvedValueOnce(updated)
+        .mockResolvedValueOnce(updated);
+
+      const data = { name: 'Stable Name' };
+      const first = await updateDealerProfile('dealer-123', data);
+      const second = await updateDealerProfile('dealer-123', data);
+
+      expect(first).toEqual(second);
+      expect(prisma.dealer.update).toHaveBeenCalledTimes(2);
+    });
+
+    it('throws if dealer not found', async () => {
+      vi.mocked(prisma.dealer.findUnique).mockResolvedValueOnce(null);
+
+      await expect(updateDealerProfile('nonexistent', { name: 'x' })).rejects.toThrow(
+        'Dealer not found: nonexistent'
+      );
+      expect(prisma.dealer.update).not.toHaveBeenCalled();
     });
   });
 

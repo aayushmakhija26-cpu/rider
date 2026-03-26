@@ -159,6 +159,81 @@ export async function updateDealerStripeSubscription(
 }
 
 /**
+ * Get dealer profile for settings page (Story 2.7)
+ * Returns all editable profile fields
+ * Throws if dealer not found
+ */
+export async function getDealerProfile(dealerId: string) {
+  const dealer = await prisma.dealer.findUnique({
+    where: { id: dealerId },
+    select: {
+      id: true,
+      name: true,
+      logoUrl: true,
+      primaryColour: true,
+      contactPhone: true,
+      contactEmail: true,
+      websiteUrl: true,
+    },
+  });
+
+  if (!dealer) {
+    throw new Error(`Dealer not found: ${dealerId}`);
+  }
+
+  return dealer;
+}
+
+/**
+ * Update dealer profile fields (Story 2.7)
+ * Validates dealer exists, applies WCAG fallback for colour, updates record
+ * Idempotent: calling twice with same data produces same result
+ */
+export async function updateDealerProfile(
+  dealerId: string,
+  data: {
+    name?: string;
+    logoUrl?: string;
+    primaryColour?: string;
+    contactPhone?: string;
+    contactEmail?: string;
+    websiteUrl?: string;
+  }
+): Promise<Dealer> {
+  const dealer = await prisma.dealer.findUnique({ where: { id: dealerId } });
+  if (!dealer) throw new Error(`Dealer not found: ${dealerId}`);
+
+  const updateData: Record<string, unknown> = {};
+
+  if (data.name !== undefined) {
+    if (data.name.length > 0) {
+      updateData.name = data.name;
+    }
+  }
+  if (data.logoUrl !== undefined) {
+    updateData.logoUrl = data.logoUrl || null;
+  }
+  if (data.primaryColour !== undefined) {
+    updateData.primaryColour = data.primaryColour ? getSafeColour(data.primaryColour) : null;
+  }
+  if (data.contactPhone !== undefined) {
+    updateData.contactPhone = data.contactPhone || null;
+  }
+  if (data.contactEmail !== undefined) {
+    updateData.contactEmail = data.contactEmail || null;
+  }
+  if (data.websiteUrl !== undefined) {
+    updateData.websiteUrl = data.websiteUrl || null;
+  }
+
+  if (Object.keys(updateData).length === 0) {
+    return dealer;
+  }
+
+  return prisma.dealer.update({ where: { id: dealerId }, data: updateData });
+}
+
+/**
  * Get dealer branding configuration (Story 2.3)
  * Returns only branding-related fields for preview/display
  * Throws error if dealer not found
