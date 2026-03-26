@@ -62,7 +62,10 @@ export async function createSessionCookie(
     throw new Error('Cannot create session: dealerId is required');
   }
 
-  const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+  // Calculate expiry: 24 hours from now, with safeguard against arithmetic overflow
+  const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+  const expiryTime = Math.min(Date.now() + ONE_DAY_MS, Number.MAX_SAFE_INTEGER);
+  const expiresAt = new Date(expiryTime);
   const session: SessionData = {
     userId: user.id,
     role: user.role,

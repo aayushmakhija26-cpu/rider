@@ -59,7 +59,10 @@ export async function middleware(request: NextRequest) {
 async function slideSession(request: NextRequest, parsed: SessionData | null): Promise<NextResponse> {
   const res = NextResponse.next();
   if (parsed && request.method === 'GET') {
-    const expiresInOneDay = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    // Calculate expiry: 24 hours from now, with safeguard against arithmetic overflow
+    const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+    const expiryTime = Math.min(Date.now() + ONE_DAY_MS, Number.MAX_SAFE_INTEGER);
+    const expiresInOneDay = new Date(expiryTime);
     res.cookies.set({
       name: 'session',
       value: await signToken({ ...parsed, expires: expiresInOneDay.toISOString() }),

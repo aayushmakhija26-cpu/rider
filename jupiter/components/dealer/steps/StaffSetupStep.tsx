@@ -18,6 +18,13 @@ const STATUS_BADGE: Record<StaffStatus, { label: string; className: string }> = 
   deactivated: { label: 'Deactivated', className: 'bg-gray-100 text-gray-500 border border-gray-200' },
 };
 
+// Simple email validation regex (RFC 5322 simplified)
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function isValidEmail(email: string): boolean {
+  return EMAIL_REGEX.test(email.trim());
+}
+
 export function StaffSetupStep({ dealerId, status, onUpdate }: StaffSetupStepProps) {
   const [email, setEmail] = useState('');
   const [isSending, setIsSending] = useState(false);
@@ -59,7 +66,14 @@ export function StaffSetupStep({ dealerId, status, onUpdate }: StaffSetupStepPro
 
   const handleSendInvite = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email.trim()) return;
+    const trimmedEmail = email.trim();
+    if (!trimmedEmail) return;
+
+    // Validate email format before API call
+    if (!isValidEmail(trimmedEmail)) {
+      setInviteError('Please enter a valid email address.');
+      return;
+    }
 
     setIsSending(true);
     setInviteError(null);
@@ -69,7 +83,7 @@ export function StaffSetupStep({ dealerId, status, onUpdate }: StaffSetupStepPro
       const res = await fetch(`/api/dealers/${dealerId}/staff`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim() }),
+        body: JSON.stringify({ email: trimmedEmail }),
       });
 
       const data = await res.json();
@@ -80,10 +94,11 @@ export function StaffSetupStep({ dealerId, status, onUpdate }: StaffSetupStepPro
       }
 
       const isResend = data.inviteMode === 'resent';
+      // Use simple escaped message to prevent XSS; React automatically escapes state values in text content
       setInviteSuccess(
         isResend
-          ? `Invite resent to ${email.trim()}.`
-          : `Invite sent to ${email.trim()}.`
+          ? `Invite resent to ${trimmedEmail}.`
+          : `Invite sent to ${trimmedEmail}.`
       );
       setEmail('');
       await loadStaff();
