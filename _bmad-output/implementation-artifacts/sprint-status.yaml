@@ -58,7 +58,7 @@ development_status:
   2-1-dealer-admin-registration: done
   2-2-dealer-onboarding-checklist: done
   2-3-dealership-branding-configuration: done
-  2-4-dealer-staff-account-management: review
+  2-4-dealer-staff-account-management: done
   2-5-role-assignment-for-dealer-staff: backlog
   2-6-stripe-billing-setup: backlog
   2-7-dealership-profile-management: backlog
