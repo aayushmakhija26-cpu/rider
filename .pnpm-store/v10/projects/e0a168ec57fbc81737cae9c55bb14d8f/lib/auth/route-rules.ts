@@ -14,6 +14,10 @@ export const ROUTE_RULES: Array<{ prefix: string; access: RouteAccess }> = [
   { prefix: '/dealer', access: ['DEALER_ADMIN'] },
   // Admin-only sub-route — must remain BEFORE /dashboard catch-all
   { prefix: '/dashboard/security/billing', access: ['DEALER_ADMIN'] },
+  // Billing settings — DEALER_ADMIN only (security gap fix from Story 2.6)
+  { prefix: '/settings/billing', access: ['DEALER_ADMIN'] },
+  // Profile settings — DEALER_ADMIN only (Story 2.7)
+  { prefix: '/settings/profile', access: ['DEALER_ADMIN'] },
   // Dealer portal
   { prefix: '/dashboard', access: ['DEALER_ADMIN', 'DEALER_STAFF'] },
   // SysAdmin portal

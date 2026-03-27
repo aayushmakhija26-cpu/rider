@@ -11,37 +11,53 @@ export async function createDealerWithAdmin(
   dealershipName: string,
   passwordHash: string
 ): Promise<{ dealer: Dealer; user: DealerUser }> {
-  return prisma.$transaction(async (tx) => {
-    // Create Dealer (represents the dealership organization/tenant)
-    const dealer = await tx.dealer.create({
-      data: {
-        name: dealershipName,
-        email, // Dealer email must be unique
-      },
-    });
+  try {
+    console.log('[dealer.service] createDealerWithAdmin called for:', email, dealershipName);
+    const result = await prisma.$transaction(async (tx) => {
+      console.log('[dealer.service] Starting transaction...');
 
-    // Create DealerUser with DEALER_ADMIN role linked to this Dealer
-    const user = await tx.dealerUser.create({
-      data: {
-        email,
-        dealerId: dealer.id,
-        passwordHash,
-        role: 'DEALER_ADMIN',
-      },
-    });
+      // Create Dealer (represents the dealership organization/tenant)
+      console.log('[dealer.service] Creating dealer...');
+      const dealer = await tx.dealer.create({
+        data: {
+          name: dealershipName,
+          email, // Dealer email must be unique
+        },
+      });
+      console.log('[dealer.service] Dealer created:', dealer.id);
 
-    // Initialize onboarding steps for the new dealer
-    await tx.onboardingStep.createMany({
-      data: ['branding', 'dms', 'staff', 'billing'].map((stepName) => ({
-        dealerId: dealer.id,
-        stepName,
-        status: 'pending',
-      })),
-      skipDuplicates: true,
-    });
+      // Create DealerUser with DEALER_ADMIN role linked to this Dealer
+      console.log('[dealer.service] Creating dealer user...');
+      const user = await tx.dealerUser.create({
+        data: {
+          email,
+          dealerId: dealer.id,
+          passwordHash,
+          role: 'DEALER_ADMIN',
+        },
+      });
+      console.log('[dealer.service] User created:', user.id);
 
-    return { dealer, user };
-  });
+      // Initialize onboarding steps for the new dealer
+      console.log('[dealer.service] Creating onboarding steps...');
+      await tx.onboardingStep.createMany({
+        data: ['branding', 'dms', 'staff', 'billing'].map((stepName) => ({
+          dealerId: dealer.id,
+          stepName,
+          status: 'pending',
+        })),
+        skipDuplicates: true,
+      });
+      console.log('[dealer.service] Onboarding steps created');
+
+      return { dealer, user };
+    });
+    console.log('[dealer.service] Transaction completed successfully');
+    return result;
+  } catch (error) {
+    console.error('[dealer.service] createDealerWithAdmin error:', error);
+    throw error;
+  }
 }
 
 /**
@@ -49,9 +65,17 @@ export async function createDealerWithAdmin(
  * Used to check for duplicate email addresses during registration.
  */
 export async function findUserByEmail(email: string): Promise<DealerUser | null> {
-  return prisma.dealerUser.findFirst({
-    where: { email },
-  });
+  try {
+    console.log('[dealer.service] findUserByEmail called for:', email);
+    const result = await prisma.dealerUser.findFirst({
+      where: { email },
+    });
+    console.log('[dealer.service] findUserByEmail result:', result ? 'found' : 'not found');
+    return result;
+  } catch (error) {
+    console.error('[dealer.service] findUserByEmail error:', error);
+    throw error;
+  }
 }
 
 /**

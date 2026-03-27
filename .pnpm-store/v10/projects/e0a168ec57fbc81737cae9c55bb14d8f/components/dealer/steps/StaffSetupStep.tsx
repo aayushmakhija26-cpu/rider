@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { toast } from 'sonner';
 import type { DealerStaffSummary } from '@/src/services/dealerStaff.service';
 
 interface StaffSetupStepProps {
@@ -28,8 +29,6 @@ function isValidEmail(email: string): boolean {
 export function StaffSetupStep({ dealerId, status, onUpdate }: StaffSetupStepProps) {
   const [email, setEmail] = useState('');
   const [isSending, setIsSending] = useState(false);
-  const [inviteError, setInviteError] = useState<string | null>(null);
-  const [inviteSuccess, setInviteSuccess] = useState<string | null>(null);
 
   const [staff, setStaff] = useState<DealerStaffSummary[]>([]);
   const [isLoadingStaff, setIsLoadingStaff] = useState(false);
@@ -71,13 +70,11 @@ export function StaffSetupStep({ dealerId, status, onUpdate }: StaffSetupStepPro
 
     // Validate email format before API call
     if (!isValidEmail(trimmedEmail)) {
-      setInviteError('Please enter a valid email address.');
+      toast.error('Please enter a valid email address.');
       return;
     }
 
     setIsSending(true);
-    setInviteError(null);
-    setInviteSuccess(null);
 
     try {
       const res = await fetch(`/api/dealers/${dealerId}/staff`, {
@@ -89,17 +86,17 @@ export function StaffSetupStep({ dealerId, status, onUpdate }: StaffSetupStepPro
       const data = await res.json();
 
       if (!res.ok) {
-        setInviteError(data.error ?? 'Failed to send invite. Please try again.');
+        const errorMsg = data.error ?? 'Failed to send invite. Please try again.';
+        toast.error(errorMsg);
         return;
       }
 
       const isResend = data.inviteMode === 'resent';
-      // Use simple escaped message to prevent XSS; React automatically escapes state values in text content
-      setInviteSuccess(
-        isResend
-          ? `Invite resent to ${trimmedEmail}.`
-          : `Invite sent to ${trimmedEmail}.`
-      );
+      const message = isResend
+        ? `Invite resent to ${trimmedEmail}.`
+        : `Invite sent to ${trimmedEmail}.`;
+
+      toast.success(message);
       setEmail('');
       await loadStaff();
 
@@ -152,11 +149,7 @@ export function StaffSetupStep({ dealerId, status, onUpdate }: StaffSetupStepPro
             type="email"
             placeholder="staff@dealership.com"
             value={email}
-            onChange={(e) => {
-              setEmail(e.target.value);
-              setInviteError(null);
-              setInviteSuccess(null);
-            }}
+            onChange={(e) => setEmail(e.target.value)}
             disabled={isSending}
             required
             className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 disabled:bg-gray-100"
@@ -169,13 +162,6 @@ export function StaffSetupStep({ dealerId, status, onUpdate }: StaffSetupStepPro
             {isSending ? 'Sending…' : 'Send Invite'}
           </button>
         </form>
-
-        {inviteError && (
-          <p className="mt-2 text-sm text-red-600">{inviteError}</p>
-        )}
-        {inviteSuccess && (
-          <p className="mt-2 text-sm text-emerald-600">{inviteSuccess}</p>
-        )}
       </div>
 
       {/* Staff list */}
@@ -224,7 +210,7 @@ export function StaffSetupStep({ dealerId, status, onUpdate }: StaffSetupStepPro
                       DEALER_STAFF
                     </span>
 
-                    {member.status !== 'deactivated' && (
+                    {member.status === 'active' && (
                       <>
                         {!isConfirming ? (
                           <button

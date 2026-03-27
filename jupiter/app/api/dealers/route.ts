@@ -114,8 +114,12 @@ export async function POST(req: NextRequest) {
     }
 
     console.error('[dealers/POST]', error);
+    if (error instanceof Error) {
+      console.error('[dealers/POST] Error message:', error.message);
+      console.error('[dealers/POST] Error stack:', error.stack);
+    }
     return Response.json(
-      { error: 'Internal error', code: 'INTERNAL_ERROR' },
+      { error: 'Internal error', code: 'INTERNAL_ERROR', message: error instanceof Error ? error.message : String(error) },
       { status: 500 }
     );
   }

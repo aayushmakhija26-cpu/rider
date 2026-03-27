@@ -1,10 +1,12 @@
 import { PrismaClient } from '@prisma/client'
-import { PrismaNeon } from '@prisma/adapter-neon'
+import { PrismaPg } from '@prisma/adapter-pg'
+import { Pool } from 'pg'
 import { AsyncLocalStorage } from 'async_hooks'
 
 // Prisma 7 uses the client engine (WASM-based) which requires a driver adapter.
-// PrismaNeon with Pool supports interactive transactions, which withDealerContext
-// uses to SET app.current_dealer_id on the same connection as the query.
+// PrismaPg uses the standard pg library over TCP/TLS (port 5432) — avoids the
+// WebSocket-based @neondatabase/serverless adapter which requires WS port 443
+// to be open and can time out in restricted network environments.
 //
 // Services should call getDb() rather than importing prisma directly so that
 // queries automatically pick up the transaction-scoped client (with RLS set)
@@ -23,9 +25,24 @@ const txContext = new AsyncLocalStorage<TxClient>()
 const globalForPrisma = globalThis as unknown as { prisma: PrismaClient }
 
 function createPrismaClient(): PrismaClient {
-  // PrismaNeon takes a PoolConfig (not a Pool instance).
-  // DATABASE_URL validation is deferred to connection time so tests can mock PrismaClient.
-  const adapter = new PrismaNeon({ connectionString: process.env.DATABASE_URL ?? '' })
+  const dbUrl = process.env.DATABASE_URL ?? ''
+
+  if (!dbUrl) {
+    throw new Error('DATABASE_URL is not set')
+  }
+
+  const pool = new Pool({
+    connectionString: dbUrl,
+    // pg >= 8.x treats sslmode=require as verify-full; override for Neon compatibility
+    ssl: { rejectUnauthorized: false },
+    // Keep 1 idle connection alive so Neon compute stays warm during development
+    min: 1,
+    idleTimeoutMillis: 600000, // 10 min
+    connectionTimeoutMillis: 30000,
+  })
+
+  const adapter = new PrismaPg(pool)
+
   return new PrismaClient({
     adapter,
     log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],

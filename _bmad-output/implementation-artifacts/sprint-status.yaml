@@ -62,7 +62,7 @@ development_status:
   2-5-role-assignment-for-dealer-staff: done
   2-6-stripe-billing-setup: done
   2-7-dealership-profile-management: done
-  epic-2-retrospective: optional
+  epic-2-retrospective: done
 
   # ─── Epic 3: DMS Integration & Consumer Data Pipeline ────────────────────────
   epic-3: backlog

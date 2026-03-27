@@ -1,67 +1,69 @@
 import Stripe from 'stripe';
-import { getStripe } from '@/lib/payments/stripe';
-import { getDealerByStripeCustomerId, updateDealerStripeSubscription } from '@/src/services/dealer.service';
-import { auditService } from '@/src/services/audit.service';
 import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/src/lib/db';
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
+  apiVersion: '2025-04-30.basil',
+});
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
 
 async function handleDealerSubscriptionChange(subscription: Stripe.Subscription) {
-  // P-2: subscription.customer may be an expanded Customer object — extract the ID safely
-  const rawCustomer = subscription.customer;
-  const customerId = typeof rawCustomer === 'string' ? rawCustomer : rawCustomer.id;
-
+  const customerId = subscription.customer as string;
   const subscriptionId = subscription.id;
   const status = subscription.status;
 
-  const dealer = await getDealerByStripeCustomerId(customerId);
+  // Find dealer by Stripe customer ID
+  const dealer = await prisma.dealer.findUnique({
+    where: { stripeCustomerId: customerId },
+  });
 
   if (!dealer) {
-    console.error('[webhook] Dealer not found for Stripe customer:', customerId);
+    console.error('Dealer not found for Stripe customer:', customerId);
     return;
   }
 
-  let updateData: Parameters<typeof updateDealerStripeSubscription>[1];
-
   if (status === 'active' || status === 'trialing') {
-    // P-16: Guard against empty items array
-    const item = subscription.items.data[0];
-    const product = item?.price?.product;
-    const stripeProductId = typeof product === 'string' ? product : (product && 'id' in product ? product.id : null);
-    const planName = typeof product === 'string' ? null : (product && 'name' in product ? (product as Stripe.Product).name : null);
+    const plan = subscription.items.data[0]?.plan;
+    let productId = null;
+    let planName = null;
 
-    updateData = {
-      stripeCustomerId: customerId,
-      stripeSubscriptionId: subscriptionId,
-      stripeProductId,
-      planName,
-      subscriptionStatus: status,
-    };
-  } else if (status === 'canceled' || status === 'unpaid') {
-    updateData = {
-      stripeSubscriptionId: null,
-      stripeProductId: null,
-      planName: null,
-      subscriptionStatus: status,
-    };
-  } else {
-    updateData = { subscriptionStatus: status };
-  }
+    if (plan?.product) {
+      const product = plan.product;
+      productId = typeof product === 'string' ? product : product?.id ?? null;
 
-  await updateDealerStripeSubscription(dealer.id, updateData);
+      // If product is a string ID, fetch the full product to get the name
+      if (typeof product === 'string') {
+        try {
+          const fullProduct = await stripe.products.retrieve(product);
+          planName = fullProduct.name;
+        } catch (err) {
+          console.error('Failed to fetch product:', err);
+        }
+      } else if (product && 'name' in product) {
+        planName = product.name;
+      }
+    }
 
-  try {
-    await auditService.log({
-      action: 'subscription_status_changed',
-      actorId: 'stripe-webhook',
-      actorRole: 'SYSTEM',
-      dealerId: dealer.id,
-      targetId: dealer.id,
-      targetType: 'Dealer',
-      metadata: { subscriptionId, status },
+    await prisma.dealer.update({
+      where: { id: dealer.id },
+      data: {
+        stripeSubscriptionId: subscriptionId,
+        stripeProductId: productId,
+        planName: planName,
+        subscriptionStatus: status,
+      },
     });
-  } catch (auditError) {
-    console.error('[webhook] audit log failed', auditError);
+  } else if (status === 'canceled' || status === 'unpaid') {
+    await prisma.dealer.update({
+      where: { id: dealer.id },
+      data: {
+        stripeSubscriptionId: null,
+        stripeProductId: null,
+        planName: null,
+        subscriptionStatus: status,
+      },
+    });
   }
 }
 
@@ -72,7 +74,6 @@ export async function POST(request: NextRequest) {
   let event: Stripe.Event;
 
   try {
-    const stripe = getStripe();
     event = stripe.webhooks.constructEvent(payload, signature, webhookSecret);
   } catch (err) {
     console.error('Webhook signature verification failed.', err);
@@ -82,21 +83,23 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  switch (event.type) {
-    case 'customer.subscription.created':
-    case 'customer.subscription.updated':
-    case 'customer.subscription.deleted': {
-      const subscription = event.data.object as Stripe.Subscription;
-      // P-6: Wrap in try/catch so DB errors return 200 to Stripe instead of causing retries
-      try {
+  try {
+    switch (event.type) {
+      case 'customer.subscription.updated':
+      case 'customer.subscription.created':
+      case 'customer.subscription.deleted':
+        const subscription = event.data.object as Stripe.Subscription;
         await handleDealerSubscriptionChange(subscription);
-      } catch (err) {
-        console.error('[webhook] handleDealerSubscriptionChange failed', err);
-      }
-      break;
+        break;
+      default:
+        console.log(`Unhandled event type ${event.type}`);
     }
-    default:
-      console.log(`Unhandled event type ${event.type}`);
+  } catch (error) {
+    console.error('Error processing webhook:', error);
+    return NextResponse.json(
+      { error: 'Error processing webhook' },
+      { status: 500 }
+    );
   }
 
   return NextResponse.json({ received: true });

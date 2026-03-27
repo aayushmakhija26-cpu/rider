@@ -1,136 +1,169 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import type { OnboardingStatus } from '@prisma/client';
-import Link from 'next/link';
+import { startCheckout, openCustomerPortal, syncSubscriptionData } from '@/app/actions/billing';
 
 interface BillingStepProps {
   status: OnboardingStatus;
   data?: Record<string, unknown>;
   onUpdate?: (data: Record<string, unknown>) => Promise<void>;
+  dealerData?: {
+    dealerId: string;
+    stripeSubscriptionId: string | null;
+    planName: string | null;
+  };
 }
 
-export function BillingStep({ status, data }: BillingStepProps) {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+export function BillingStep({
+  status,
+  data,
+  onUpdate,
+  dealerData,
+}: BillingStepProps) {
+  const [isLoading, setIsLoading] = useState(false);
+  const [subscriptionData, setSubscriptionData] = useState(dealerData);
 
-  const isComplete = status === 'complete';
-  const planName = data?.planName as string | undefined;
-  const subscriptionStatus = data?.subscriptionStatus as string | undefined;
+  // Check if we just returned from Stripe checkout and sync data
+  useEffect(() => {
+    const checkAndSync = async () => {
+      if (!dealerData?.dealerId) {
+        console.log('[BillingStep] No dealerId provided');
+        return;
+      }
 
-  const isActiveSubscription =
-    subscriptionStatus === 'active' || subscriptionStatus === 'trialing';
+      // If already configured, no need to sync
+      if (dealerData.stripeSubscriptionId) {
+        console.log('[BillingStep] Already has subscription:', dealerData.stripeSubscriptionId);
+        setSubscriptionData(dealerData);
 
-  async function handleSetupBilling() {
-    setError(null);
-    // P-12: Surface missing env var to the user rather than silently failing
-    const priceId = process.env.NEXT_PUBLIC_STRIPE_PRICE_ID;
-    if (!priceId) {
-      setError('Billing is not configured. Please contact support.');
-      return;
-    }
+        // Mark step as complete if not already marked
+        if (status !== 'complete' && onUpdate) {
+          console.log('[BillingStep] Marking billing step as complete');
+          try {
+            await onUpdate({
+              stripeSubscriptionId: dealerData.stripeSubscriptionId,
+              planName: dealerData.planName,
+            });
+          } catch (error) {
+            console.error('[BillingStep] Failed to mark step complete:', error);
+          }
+        }
+        return;
+      }
 
-    setLoading(true);
+      // Try to sync from Stripe
+      console.log('[BillingStep] Syncing subscription data from Stripe...');
+      try {
+        const result = await syncSubscriptionData(dealerData.dealerId);
+        console.log('[BillingStep] Sync result:', result);
+        if (result) {
+          const newData = {
+            dealerId: dealerData.dealerId,
+            stripeSubscriptionId: result.stripeSubscriptionId,
+            planName: result.planName,
+          };
+          setSubscriptionData(newData);
+
+          // Mark step as complete
+          if (onUpdate) {
+            console.log('[BillingStep] Marking billing step as complete after sync');
+            try {
+              await onUpdate({
+                stripeSubscriptionId: result.stripeSubscriptionId,
+                planName: result.planName,
+              });
+            } catch (error) {
+              console.error('[BillingStep] Failed to mark step complete:', error);
+            }
+          }
+        }
+      } catch (error) {
+        console.error('[BillingStep] Failed to sync subscription:', error);
+      }
+    };
+
+    checkAndSync();
+  }, [dealerData?.dealerId, dealerData?.stripeSubscriptionId, status, onUpdate]);
+
+  const isConfigured = subscriptionData?.stripeSubscriptionId;
+  const planName = subscriptionData?.planName || 'Not configured';
+
+  const handleSetupBilling = async () => {
+    setIsLoading(true);
     try {
-      const res = await fetch('/api/stripe/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ priceId }),
-      });
-
-      if (!res.ok) {
-        // P-7: Surface API errors to the user
-        const data = await res.json().catch(() => ({}));
-        setError(data?.error ?? 'Failed to start billing setup. Please try again.');
-        return;
-      }
-
-      const { url } = await res.json();
-      if (!url) {
-        setError('Failed to start billing setup. Please try again.');
-        return;
-      }
-      window.location.href = url;
-    } catch {
-      setError('Failed to start billing setup. Please try again.');
+      await startCheckout();
+    } catch (error) {
+      console.error('Checkout failed:', error);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
-  }
+  };
 
-  if (isComplete) {
-    return (
-      <div className="space-y-4">
-        <div className="flex items-center space-x-3">
-          <div>
-            <p className="text-sm font-medium text-gray-900">
-              {planName ?? 'Active subscription'}
-            </p>
-            {subscriptionStatus && (
-              <span
-                className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                  isActiveSubscription
-                    ? 'bg-emerald-100 text-emerald-800'
-                    : 'bg-red-100 text-red-800'
-                }`}
-              >
-                {subscriptionStatus}
-              </span>
-            )}
-          </div>
-        </div>
-        <Link
-          href="/settings/billing"
-          className="inline-flex items-center text-sm font-medium text-orange-600 hover:text-orange-500"
-        >
-          Manage Subscription →
-        </Link>
-      </div>
-    );
-  }
+  const handleManageSubscription = async () => {
+    setIsLoading(true);
+    try {
+      await openCustomerPortal();
+    } catch (error) {
+      console.error('Portal failed:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-gray-600">
-        Set up your dealership subscription to access all campaign features.
-      </p>
-      {error && (
-        <p className="text-sm text-red-600">{error}</p>
+      {isConfigured ? (
+        <>
+          <div className="bg-emerald-50 border border-emerald-200 rounded-md p-3">
+            <p className="text-sm text-emerald-900">
+              ✓ Your subscription is active. You have full access to all campaign features.
+            </p>
+          </div>
+
+          <div className="text-sm text-gray-600 space-y-2">
+            <p>
+              <strong>Current Plan:</strong> {planName}
+            </p>
+            <p>
+              <strong>Status:</strong> Active
+            </p>
+          </div>
+
+          <button
+            onClick={handleManageSubscription}
+            disabled={isLoading}
+            className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 font-medium"
+          >
+            {isLoading ? 'Loading...' : 'Manage Subscription'}
+          </button>
+        </>
+      ) : (
+        <>
+          <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
+            <p className="text-sm text-blue-900">
+              💳 Set up a subscription to activate your dealership account and access all campaign features.
+            </p>
+          </div>
+
+          <div className="text-sm text-gray-600 space-y-2">
+            <p>
+              <strong>Current Plan:</strong> Not configured
+            </p>
+            <p>
+              <strong>Status:</strong> Pending setup
+            </p>
+          </div>
+
+          <button
+            onClick={handleSetupBilling}
+            disabled={isLoading}
+            className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 font-medium"
+          >
+            {isLoading ? 'Loading...' : 'Set up billing'}
+          </button>
+        </>
       )}
-      <button
-        type="button"
-        onClick={handleSetupBilling}
-        disabled={loading}
-        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        {loading ? (
-          <>
-            <svg
-              className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
-              />
-              <path
-                className="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-              />
-            </svg>
-            Setting up billing…
-          </>
-        ) : (
-          'Set up billing'
-        )}
-      </button>
     </div>
   );
 }

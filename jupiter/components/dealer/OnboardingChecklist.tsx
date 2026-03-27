@@ -29,6 +29,11 @@ interface OnboardingChecklistProps {
     status: OnboardingStatus,
     data?: Record<string, unknown>
   ) => Promise<void>;
+  dealerData?: {
+    dealerId: string;
+    stripeSubscriptionId: string | null;
+    planName: string | null;
+  };
 }
 
 const STEP_DISPLAY_NAMES: Record<string, string> = {
@@ -69,6 +74,7 @@ function getStatusBadgeText(status: OnboardingStatus): string {
 export function OnboardingChecklist({
   steps,
   onStepUpdate,
+  dealerData,
 }: OnboardingChecklistProps) {
   const [activeStep, setActiveStep] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -235,6 +241,7 @@ export function OnboardingChecklist({
                       status={step.status}
                       data={step.data as Record<string, unknown>}
                       onUpdate={(data) => handleStepComplete(step.stepName, data)}
+                      dealerData={dealerData}
                     />
                   )}
 

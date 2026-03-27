@@ -19,10 +19,16 @@ import { updateOnboardingStep } from '@/app/actions/onboarding';
 
 interface OnboardingChecklistClientProps {
   initialSteps: OnboardingStep[];
+  dealerData?: {
+    dealerId: string;
+    stripeSubscriptionId: string | null;
+    planName: string | null;
+  };
 }
 
 export function OnboardingChecklistClient({
   initialSteps,
+  dealerData,
 }: OnboardingChecklistClientProps) {
   const [steps, setSteps] = useState<OnboardingStep[]>(initialSteps);
   const [notification, setNotification] = useState<{
@@ -89,7 +95,7 @@ export function OnboardingChecklistClient({
           {notification.message}
         </div>
       )}
-      <OnboardingChecklist steps={steps} onStepUpdate={handleStepUpdate} />
+      <OnboardingChecklist steps={steps} onStepUpdate={handleStepUpdate} dealerData={dealerData} />
     </>
   );
 }
